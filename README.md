@@ -116,13 +116,12 @@ production:
 
 $ docker run --rm   --name societalbook_production -e POSTGRES_PASSWORD=societalbook -d -p 5432:5432 -v $HOME/docker/volumes/postgres:/var/lib/postgresql/data  postgres
 
-$ docker run -d --name societalbook -e POSTGRES_USER=societalbook -e POSTGRES_PASSWORD=societalbook -d -p 5432:5432 postgres
-
+$ 
 $ docker run -d --name societalbook -d -p 5432:5432 postgres
 
 $ docker run -d --name societalbook -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres
 
-$ docker exec -ti f0c5305d2302 bash
+$ docker exec -ti f5d710e43239 bash
 $ su postgres
 psql (12.1 (Debian 12.1-1.pgdg100+1))
 Type "help" for help.
@@ -251,3 +250,17 @@ end
 <p class="alert"><%= alert %></p>
 
 ````
+
+## Milestone 3: Users & posts
+```sh
+$ rails generate migration add_name_to_users name:string
+      invoke  active_record
+      create    db/migrate/20191205204514_add_name_to_users.rb
+
+$ rails db:migrate
+== 20191205204514 AddNameToUsers: migrating ===================================
+-- add_column(:users, :name, :string)
+   -> 0.0567s
+== 20191205204514 AddNameToUsers: migrated (0.0573s) ==========================
+
+```
