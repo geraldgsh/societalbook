@@ -264,3 +264,4 @@ $ rails db:migrate
 == 20191205204514 AddNameToUsers: migrated (0.0573s) ==========================
 
 ```
+views
