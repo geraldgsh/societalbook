@@ -116,7 +116,7 @@ production:
 
 $ docker run --rm   --name societalbook_production -e POSTGRES_PASSWORD=societalbook -d -p 5432:5432 -v $HOME/docker/volumes/postgres:/var/lib/postgresql/data  postgres
 
-$ 
+$
 $ docker run -d --name societalbook -d -p 5432:5432 postgres
 
 $ docker run -d --name societalbook -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -d -p 5432:5432 postgres
@@ -135,8 +135,8 @@ postgres=# CREATE DATABASE societalbook_production
 sudo -u postgres createuser -s railsdevuser
 sudo -u postgres psql
 postgres=# \password railsdevuser
-Enter new password: 
-Enter it again: 
+Enter new password:
+Enter it again:
 \q
 
 #Telling rails to used postgresql
@@ -172,7 +172,7 @@ Created database 'societalbook_test'
 ```
 
 2. Users must sign in to see anything except the sign in page.
-# Intalling devise via rails 
+# Intalling devise via rails
 ```sh
 $ rails generate devise:install
 ```
@@ -265,3 +265,53 @@ $ rails db:migrate
 
 ```
 views
+
+# Post functionality
+1. Generate a Post model via rails and make the corresponding migration as follows:
+```sh
+$ rails generate model micropost content:text
+Running via Spring preloader in process 3891
+invoke  active_record
+create    db/migrate/20191205215847_create_microposts.rb
+create    app/models/micropost.rb
+invoke    test_unit
+create      test/models/micropost_test.rb
+create      test/fixtures/microposts.yml
+$ rails db:migrate
+== 20191205204514 AddNameToUsers: migrating ===================================
+-- add_column(:users, :name, :string)
+   -> 0.0016s
+== 20191205204514 AddNameToUsers: migrated (0.0016s) ==========================
+
+== 20191205215847 CreateMicroposts: migrating =================================
+-- create_table(:microposts)
+   -> 0.0585s
+== 20191205215847 CreateMicroposts: migrated (0.0585s) ========================
+```
+2. After the post model is generated we need to map the routes for the post actions.
+```ruby
+#routes
+get "microposts", to: "microposts#index"
+get "microposts/new", to: "microposts#new", as: :new_microposts
+get "microposts/:id", to: "microposts#show"
+get "microposts/:id/edit", to: "microposts#edit"
+
+patch "microposts/:id",  to: "microposts#update", as: :micropost
+post "microposts", to: "microposts#create"
+delete "microposts/:id",  to: "microposts#destroy"
+```
+3. A controllers is needed for the resources that we put in our routes.
+```sh
+$ rails generate controller microposts
+create  app/controllers/microposts_controller.rb
+invoke  erb
+create    app/views/microposts
+invoke  test_unit
+create    test/controllers/microposts_controller_test.rb
+invoke  helper
+create    app/helpers/microposts_helper.rb
+invoke    test_unit
+invoke  assets
+invoke    scss
+create      app/assets/stylesheets/microposts.scss
+```
