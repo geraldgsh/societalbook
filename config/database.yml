@@ -20,13 +20,15 @@ default: &default
   # For details on connection pooling, see Rails configuration guide
   # https://guides.rubyonrails.org/configuring.html#database-pooling
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  timeout: 5000
 
 development:
-  <<: *default
+  adapter: postgresql
+  encoding: unicode
   database: societalbook_development
-  host: localhost
-  username: railsdevuser
-  password: password
+  username: postgres
+  password: postgres
+  host: 127.0.0.1
 
   # The specified database role being used to connect to postgres.
   # To create additional roles in postgres see `$ createuser --help`.
@@ -59,11 +61,12 @@ development:
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  <<: *default
+  adapter: postgresql
+  encoding: unicode
   database: societalbook_test
-  host: localhost
-  username: railsdevuser
-  password: password
+  username: postgres
+  password: postgres
+  host: 127.0.0.1
 
 # As with config/credentials.yml, you never want to store sensitive information,
 # like your database password, in your source code. If your source code is
@@ -85,7 +88,9 @@ test:
 #     url: <%= ENV['DATABASE_URL'] %>
 #
 production:
-  <<: *default
+  adapter: postgresql
+  encoding: unicode
   database: societalbook_production
-  username: societalbook
-  password: <%= ENV['SOCIETALBOOK_DATABASE_PASSWORD'] %>
+  username: postgres
+  password: postgres
+  host: 127.0.0.1
