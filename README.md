@@ -315,3 +315,12 @@ invoke  assets
 invoke    scss
 create      app/assets/stylesheets/microposts.scss
 ```
+4. Associate micropots to user via migration:
+```sh
+$ rails g migration add_user_id_to_microposts user:references
+invoke  active_record
+create    db/migrate/20191205235313_add_user_id_to_microposts.rb
+$ rails db:migrate
+== 20191205235313 AddUserIdToMicroposts: migrating ============================
+== 20191205235313 AddUserIdToMicroposts: migrated (0.0000s) ===================
+```

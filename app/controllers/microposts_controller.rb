@@ -24,7 +24,7 @@ class MicropostsController < ApplicationController
 
 	def create
     puts "#$$$$$$$$$$$$$$ #{current_user}"
-		@post = Micropost.create(content: params[:micropost][:content])
+		@post = current_user.microposts.create(content: params[:micropost][:content])
 		render json: @post
 	end
 
