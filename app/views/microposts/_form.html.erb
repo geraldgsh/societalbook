@@ -1,11 +1,12 @@
+
 <%= form_with(model: @post, local: true) do |form| %>
 
 	<div class="field">
-		<%= form.label :content %>
-		<%= form.text_area :content %>
+		<%= form.label :content, "What's on your mind ?", class: "label" %>
+		<%= form.text_area :content, class: "textarea" %>
 	</div>
 
 	<div>
-		<%= form.submit %>
+		<%= form.submit "Save", class: "button is-dark is-fullwidth" %>
 	</div>
 <% end %>
