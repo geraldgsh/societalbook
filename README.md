@@ -295,7 +295,7 @@ end
 
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name)) do |f| %>
   <%= render "devise/shared/error_messages", resource: resource %>
-  
+
   <div class="name">
     <%= f.label :name %><br />
     <%= f.text_field :name, autofocus: true %>
@@ -405,7 +405,7 @@ $ rails generate controller home
   <li class="nav-item">
     <%= link_to 'Home', root_path, class: "nav-link" %>
   </li>
-	
+
   <% if user_signed_in? %>
     <li class="nav-item">
       <%= link_to 'Log Out', destroy_user_session_path, method: :delete, class: "nav-link" %>
@@ -592,4 +592,45 @@ create    db/migrate/20191205235313_add_user_id_to_microposts.rb
 $ rails db:migrate
 == 20191205235313 AddUserIdToMicroposts: migrating ============================
 == 20191205235313 AddUserIdToMicroposts: migrated (0.0000s) ===================
+```
+
+# Execute rspec tests
+```sh
+$ bundle exec rspec spec/models
+```
+# Micropost rpesc test
+1. This test should be in a file called micropost_spec.tb inside the spec/modles folder as shows bellow:
+```ruby
+require 'rails_helper'
+
+RSpec.describe Micropost, type: :model do
+  before :each do
+    @user = User.create(name: 'test', email: 'test@test.com', password: 'foobar')
+  end
+  describe 'content' do
+    it 'should not be empty' do
+      @micropost = @user.microposts.build(content: '')
+      expect(@micropost.valid?).to eql(false)
+      expect(@micropost.errors.messages[:content]).to include("can't be blank")
+    end
+    it 'should not be longer than 255' do
+      @micropost = @user.microposts.build(content: 'A' * 256)
+      expect(@micropost.valid?).to eql(false)
+      expect(@micropost.errors.messages[:content]).to include('is too long (maximum is 255 characters)')
+    end
+    it 'should have an author' do
+      @micropost = Micropost.new(content: 'A' * 10)
+      expect(@micropost.valid?).to eql(false)
+      expect(@micropost.errors.messages[:user]).to include('must exist')
+    end
+  end
+end
+```
+Then we need to execute the test
+```sh
+$ bundle exec rspec spec/models
+..........
+
+Finished in 0.58586 seconds (files took 0.76588 seconds to load)
+10 examples, 0 failures
 ```
