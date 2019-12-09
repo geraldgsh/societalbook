@@ -1,0 +1,11 @@
+<%= form_with(model: @post, local: true) do |form| %>
+
+	<div class="field">
+		<%= form.label :content %>
+		<%= form.text_area :content %>
+	</div>
+
+	<div>
+		<%= form.submit %>
+	</div>
+<% end %>

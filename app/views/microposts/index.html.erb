@@ -1,0 +1,8 @@
+<div class="large-container center-block">
+	<h1>My Posts</h1>
+	<% @post.each do |p| %>
+		<h3> User: <%= current_user.email %></h3>
+
+		<%= p.content %>
+	<%end%>
+</div>
