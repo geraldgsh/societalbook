@@ -11,4 +11,5 @@ Rails.application.routes.draw do
   # post "microposts", to: "microposts#create"
   # delete "microposts/:id",  to: "microposts#destroy"
   resources :microposts, only: [:create, :destroy, :index, :show]
+  resources :comments, only: [:create, :destroy, :update, :edit]
 end
