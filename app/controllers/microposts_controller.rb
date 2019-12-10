@@ -3,7 +3,8 @@ class MicropostsController < ApplicationController
 	before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy]
 
 	def index
-		@post = Micropost.all
+    @posts = Micropost.all
+    @post = Micropost.new
 	end
 
 	def show
@@ -25,7 +26,8 @@ class MicropostsController < ApplicationController
 	def create
     puts "#$$$$$$$$$$$$$$ #{current_user}"
 		@post = current_user.microposts.create(content: params[:micropost][:content])
-		render json: @post
+		redirect_to microposts_url
+		# render json: @post
 	end
 
 	def destroy
