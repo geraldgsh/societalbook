@@ -286,6 +286,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
   end
 end
 
+# config/environments/development.rb
+
+config.action_mailer.default_url_options = { :host => 'localhost:3000' }
 ```
 
 ```erb
@@ -395,9 +398,17 @@ $ rails generate controller home
 ```
 
 ```erb
-# app/view/home/index.html.erb
+# app/view/home/start.html.erb
 
-<h1>Hello <%=current_user.email%></h1>
+<section class="hero is-dark">
+  <div class="hero-body">
+    <div class="container">
+      <h1 class="title">
+        Welcome to Societalbook!  <%=current_user.email%>
+      </h1>
+    </div>
+  </div>
+</section>
 
 # app/view/layouts/_nav.html.erb
 
@@ -420,7 +431,7 @@ $ rails generate controller home
   <% end %>
 </nav>
 
-# app/view/layouts/application.html.erb
+# app/views/layouts/application.html.erb
 
 <!DOCTYPE html>
 <html>
@@ -428,29 +439,147 @@ $ rails generate controller home
     <title>Societalbook</title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-
+    
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
   </head>
 
   <body>
-    <%= render 'layouts/nav' %>  
-    <p class="notice"><%= notice %></p>
-    <p class="alert"><%= alert %></p>
-    <%= yield %>
+    <div class="container">
+      <%# <%= render 'layouts/nav' %>
+      <%= render "partials/nav"%>
+        <% if notice %>
+          <p class="notification is-success">
+            <button class="delete"></button>
+            <%= notice %>
+          </p>
+        <% end %>
+        <% if alert %>
+          <p class="notification is-danger">
+            <button class="delete"></button>
+            <%= alert %>
+          </p>
+        <% end %>
+      <%= yield %>
+    </div>
   </body>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+        $notification = $delete.parentNode;
+        $delete.addEventListener('click', () => {
+          $notification.parentNode.removeChild($notification);
+        });
+      });
+    });
+  </script>
 </html>
+
+# app/views/microposts/_feed.html.erb
+
+<% @posts.each do |p| %>
+<article class="media">
+  <figure class="media-left">
+    <p class="image is-64x64">
+      <%= link_to gravatar_for(current_user, size: 50)%>
+    </p>
+  </figure>
+  <div class="media-content">
+    <div class="content">
+      <p>
+        <strong><%= current_user.name %></strong>
+        <br>
+        <%= p.content %>
+      </p>		
+    </div>
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <a class="level-item">
+          <span class="icon is-small"><i class="fas fa-reply"></i></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small"><i class="fas fa-retweet"></i></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small"><i class="fas fa-heart"></i></span>
+        </a>
+      </div>
+    </nav>
+  </div>
+  <div class="media-right">
+    <button class="micropost delete"></button>
+  </div>
+</article>
+<%end%>
+
+# app/views/microposts/_form.html.erb
+
+<%= form_with(model: @post, local: true) do |form| %>
+
+  <div class="field">
+    <%= form.label :content, "What's on your mind ?", class: "label" %>
+    <%= form.text_area :content, class: "textarea" %>
+  </div>
+
+  <div>
+    <%= form.submit "Save", class: "button is-dark is-fullwidth" %>
+  </div>
+<% end %>
+
+# app/views/microposts/edit.html.erb
+
+<div class="small-container center-block">
+  <%= render "microposts/form" %>
+</div>
+
+# app/views/microposts/index.html.erb
+
+<div class="hero">
+  <div class="hero-body">
+    <div class="container">
+      <% if signed_in? %>
+        <div class="columns">
+          <div class="column is-one-third">
+            <section class="micropost_form">
+              <%= render "form" %>
+            </section>
+          </div>
+          <div class="column is-two-third">
+            <h3>Micropost Feed</h3>
+            <%= render "feed" %>
+          </div>
+        </div>
+      <%end%>
+    </div>
+  </div>
+</div>
+
+# app/views/microposts/new.html.erb
+
+<div class="columns is-mobile">
+  <div class="column is-half is-offset-one-quarter">
+    <%= render "microposts/form" %>
+  </div>
+</div>
+
+# app/views/microposts/show.html.erb
+
+<div>
+  <%= @post.content %>
+</div>
+
+<div>
+  <%= link_to "Delete Post", @post, method: :delete%>
+</div>
+
 ```
 
 ```ruby
-# config/environments/development.rb
-
-config.action_mailer.default_url_options = { :host => 'localhost:3000' }
-
 # config/routes.rb
 
 Rails.application.routes.draw do
-  root to: "home#index"
+  root to: "home#start"
 .
 .
 end
@@ -468,6 +597,35 @@ end
 ```
 
 ## Milestone 3: Users & posts
+
+## Gravatar
+```ruby
+# app/helpers/users_hekp.rb
+
+module UsersHelper
+
+  # Returns the Gravatar for the given user.
+  def gravatar_for(user, size: 80)
+    gravatar_id = Digest::MD5::hexdigest(user.email.downcase)
+    gravatar_url = "https://secure.gravatar.com/avatar/#{gravatar_id}?s=#{size}"
+    image_tag(gravatar_url, alt: user.name, class: "gravatar")
+  end
+end
+```
+
+```erb
+# app/views/microposts/_feed.html.erb
+.
+.
+  <figure class="media-left">
+    <p class="image is-64x64">
+      <%= link_to gravatar_for(current_user, size: 50)%>
+    </p>
+  </figure>
+.
+.
+```
+
 
 # Post functionality
 
@@ -584,7 +742,7 @@ invoke  assets
 invoke    scss
 create      app/assets/stylesheets/microposts.scss
 ```
-4. Associate micropots to user via migration:
+4. Associate microposts to user via migration:
 ```sh
 $ rails g migration add_user_id_to_microposts user:references
 invoke  active_record

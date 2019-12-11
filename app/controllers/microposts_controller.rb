@@ -4,7 +4,9 @@ class MicropostsController < ApplicationController
 
 	def index
     @posts = Micropost.all
-    @post = Micropost.new
+		@post = Micropost.new
+		@comments = Comment.all
+		@comment = Comment.new
 	end
 
 	def show
@@ -20,7 +22,7 @@ class MicropostsController < ApplicationController
 	end
 
 	def new
-		@post = Micropost.new
+		@post = current_user.posts.build
 	end
 
 	def create
