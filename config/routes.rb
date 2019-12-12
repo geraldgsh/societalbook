@@ -10,6 +10,9 @@ Rails.application.routes.draw do
   # patch "microposts/:id",  to: "microposts#update", as: :micropost
   # post "microposts", to: "microposts#create"
   # delete "microposts/:id",  to: "microposts#destroy"
-  resources :microposts, only: [:create, :destroy, :index, :show]
+  resources :microposts, only: %i[create destroy index show] do
+    resources :likes, only: %i[create destroy]
+  end
   resources :comments, only: [:create, :destroy, :update, :edit]
+  
 end

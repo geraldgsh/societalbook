@@ -579,6 +579,7 @@ $ rails generate controller home
 # config/routes.rb
 
 Rails.application.routes.draw do
+  devise_for :users, controllers: { registrations: 'users/registrations' }
   root to: "home#start"
 .
 .
@@ -598,9 +599,20 @@ end
 
 ## Milestone 3: Users & posts
 
-## Gravatar
+Create models with associations and implement all requested features for users and posts. Add authentication with Devise as described in requirements.
+
+Remember about unit and integrations tests!
+
+## Gravatar Setup
+
+Gravatar stands for Globally Recognized Avatar. It is globally recognized because millions of people and websites use them. Most popular applications like WordPress have built-in support for Gravatar. When a user leaves a comment (with email) on a site that supports Gravatar, it pulls their Globally Recognized Avatar from Gravatar servers. Then that picture is shown next to the comment. This allows each commenter to have their identity through out the world wide web.
+
+[source](https://www.wpbeginner.com/beginners-guide/what-is-gravatar-and-why-you-should-start-using-it-right-away/)
+
+For the purpose of this project, Gravatar will be used for added aesthetics.
+
 ```ruby
-# app/helpers/users_hekp.rb
+# app/helpers/users_help.rb
 
 module UsersHelper
 
@@ -626,10 +638,12 @@ end
 .
 ```
 
-
-# Post functionality
+# Micropost functionality
 
 1. Generate a Post model via rails and make the corresponding migration as follows:
+
+## Generate/Setup micropost model & DB tables
+
 ```sh
 $ rails generate model micropost content:text
 Running via Spring preloader in process 3891
@@ -639,6 +653,20 @@ create    app/models/micropost.rb
 invoke    test_unit
 create      test/models/micropost_test.rb
 create      test/fixtures/microposts.yml
+```
+```ruby
+#db/migrate/timestamp_create_microposts.rb
+class CreateMicroposts < ActiveRecord::Migration[6.0]
+  def change
+    create_table :microposts do |t|
+      t.text :content
+
+      t.timestamps
+    end
+  end
+end
+```
+```sh
 $ rails db:migrate
 == 20191205204514 AddNameToUsers: migrating ===================================
 -- add_column(:users, :name, :string)
@@ -650,19 +678,32 @@ $ rails db:migrate
    -> 0.0585s
 == 20191205215847 CreateMicroposts: migrated (0.0585s) ========================
 ```
-2. After the post model is generated we need to map the routes for the post actions.
 ```ruby
-#routes
-get "microposts", to: "microposts#index"
-get "microposts/new", to: "microposts#new", as: :new_microposts
-get "microposts/:id", to: "microposts#show"
-get "microposts/:id/edit", to: "microposts#edit"
+# app/models/micropost.rb
 
-patch "microposts/:id",  to: "microposts#update", as: :micropost
-post "microposts", to: "microposts#create"
-delete "microposts/:id",  to: "microposts#destroy"
+class Micropost < ApplicationRecord
+  belongs_to :user
+  has_many :comments, dependent: :destroy
+  has_many :likes, dependent: :destroy
+  validates :content, length: { maximum: 255 }, presence: true
+end
 ```
-3. A controllers is needed for the resources that we put in our routes.
+
+2. After the post model is generated we need to map the routes for the post actions.
+
+```ruby
+# config/routes.rb
+
+Rails.application.routes.draw do
+.
+.
+  resources :microposts, only: %i[create destroy index show]
+.
+.
+```
+
+3. Microposts controllers is generated to interact between model and view
+
 ```sh
 $ rails generate controller microposts
 create  app/controllers/microposts_controller.rb
@@ -677,7 +718,9 @@ invoke  assets
 invoke    scss
 create      app/assets/stylesheets/microposts.scss
 ```
-4. Associate micropots to user via migration:
+
+4. Generate a DB table to Associate microposts to user via migration:
+
 ```sh
 $ rails g migration add_user_id_to_microposts user:references
 invoke  active_record
@@ -687,69 +730,225 @@ $ rails db:migrate
 == 20191205235313 AddUserIdToMicroposts: migrated (0.0000s) ===================
 ```
 
-## Unit and integrations tests
 ```ruby
-# app/models/user.rb
+# db/migrate/timestamp_add_user_id_to_micropost.rb
 
-views
-
-# Post functionality
-1. Generate a Post model via rails and make the corresponding migration as follows:
-```sh
-$ rails generate model micropost content:text
-Running via Spring preloader in process 3891
-invoke  active_record
-create    db/migrate/20191205215847_create_microposts.rb
-create    app/models/micropost.rb
-invoke    test_unit
-create      test/models/micropost_test.rb
-create      test/fixtures/microposts.yml
-$ rails db:migrate
-== 20191205204514 AddNameToUsers: migrating ===================================
--- add_column(:users, :name, :string)
-   -> 0.0016s
-== 20191205204514 AddNameToUsers: migrated (0.0016s) ==========================
-
-== 20191205215847 CreateMicroposts: migrating =================================
--- create_table(:microposts)
-   -> 0.0585s
-== 20191205215847 CreateMicroposts: migrated (0.0585s) ========================
+class AddUserIdToMicroposts < ActiveRecord::Migration[6.0]
+  def change
+    add_reference :microposts, :user, null: false, foreign_key: true
+  end
+end
 ```
-2. After the post model is generated we need to map the routes for the post actions.
+
+5. Setup Micropost controller for model to interact with view
+
 ```ruby
-#routes
-get "microposts", to: "microposts#index"
-get "microposts/new", to: "microposts#new", as: :new_microposts
-get "microposts/:id", to: "microposts#show"
-get "microposts/:id/edit", to: "microposts#edit"
+class MicropostsController < ApplicationController
+  before_action :find_post, except: [:new, :create, :index]
+  before_action :authenticate_user!, only: [:new, :create, :edit, :update, :destroy]
 
-patch "microposts/:id",  to: "microposts#update", as: :micropost
-post "microposts", to: "microposts#create"
-delete "microposts/:id",  to: "microposts#destroy"
+  def index
+    @posts = Micropost.all
+    @post = Micropost.new
+  end
+
+  def show
+  end
+
+  def edit
+  end
+
+  def update
+    @post.update(content: params[:post][:content])
+    redirect_to @post
+  end
+
+  def new
+    @post = current_user.posts.build
+  end
+
+  def create
+    puts "#$$$$$$$$$$$$$$ #{current_user}"
+    @post = current_user.microposts.create(content: params[:micropost][:content])
+    redirect_to microposts_url
+  end
+
+  def destroy
+    @post.destroy
+    redirect_to root_path
+  end
+
+  def find_post
+    @post = Micropost.find(params[:id])
+  end
+end
 ```
-3. A controllers is needed for the resources that we put in our routes.
+
+5. Generate & setup User model
 ```sh
-$ rails generate controller microposts
-create  app/controllers/microposts_controller.rb
-invoke  erb
-create    app/views/microposts
-invoke  test_unit
-create    test/controllers/microposts_controller_test.rb
-invoke  helper
-create    app/helpers/microposts_helper.rb
-invoke    test_unit
-invoke  assets
-invoke    scss
-create      app/assets/stylesheets/microposts.scss
+$ rails generate model user
+      invoke  active_record
+      create    db/migrate/20191212161226_create_users.rb
+      create    app/models/user.rb
+      invoke    test_unit
+      create      test/models/user_test.rb
+      create      test/fixtures/users.yml
 ```
-4. Associate microposts to user via migration:
+```ruby
+# db/migrate/timestamp_devise_create_users.rb
+
+# frozen_string_literal: true
+
+class DeviseCreateUsers < ActiveRecord::Migration[6.0]
+  def change
+    create_table :users do |t|
+      ## Database authenticatable
+      t.string :email,              null: false, default: ""
+      t.string :encrypted_password, null: false, default: ""
+
+      ## Recoverable
+      t.string   :reset_password_token
+      t.datetime :reset_password_sent_at
+
+      ## Rememberable
+      t.datetime :remember_created_at
+
+      ## Trackable
+      # t.integer  :sign_in_count, default: 0, null: false
+      # t.datetime :current_sign_in_at
+      # t.datetime :last_sign_in_at
+      # t.inet     :current_sign_in_ip
+      # t.inet     :last_sign_in_ip
+
+      ## Confirmable
+      # t.string   :confirmation_token
+      # t.datetime :confirmed_at
+      # t.datetime :confirmation_sent_at
+      # t.string   :unconfirmed_email # Only if using reconfirmable
+
+      ## Lockable
+      # t.integer  :failed_attempts, default: 0, null: false # Only if lock strategy is :failed_attempts
+      # t.string   :unlock_token # Only if unlock strategy is :email or :both
+      # t.datetime :locked_at
+
+
+      t.timestamps null: false
+    end
+
+    add_index :users, :email,                unique: true
+    add_index :users, :reset_password_token, unique: true
+    # add_index :users, :confirmation_token,   unique: true
+    # add_index :users, :unlock_token,         unique: true
+  end
+end
+```
+
+```ruby
+# app/model/user.rb
+
+class User < ApplicationRecord
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable, :trackable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable
+  has_many :microposts
+  has_many :likes, dependent: :destroy
+  validates :name, presence: true, length: { maximum: 50 }
+  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }, uniqueness: true
+  validates :password, presence: true, length: { minimum: 6 }, allow_nil: true
+end
+```
+
+
+6. Generate & setup users controller
 ```sh
-$ rails g migration add_user_id_to_microposts user:references
-invoke  active_record
-create    db/migrate/20191205235313_add_user_id_to_microposts.rb
-$ rails db:migrate
-== 20191205235313 AddUserIdToMicroposts: migrating ============================
-== 20191205235313 AddUserIdToMicroposts: migrated (0.0000s) ===================
+$ rails generate controller users
+      create  app/controllers/users_controller.rb
+      invoke  erb
+      create    app/views/users
+      invoke  test_unit
+      create    test/controllers/users_controller_test.rb
+      invoke  helper
+      create    app/helpers/users_helper.rb
+      invoke    test_unit
+      invoke  assets
+      invoke    scss
+      create      app/assets/stylesheets/users.scss`
+```
+```ruby
+# app/controller/users_controller.rb
+
+class UsersController < ApplicationController
+  def show
+  end
+
+  def edit
+  end
+end
+
+# app/controllers/users/registrations_controller.rb
+
+class Users::RegistrationsController < Devise::RegistrationsController
+  before_action :configure_sign_up_params, only: [:create]
+  before_action :configure_account_update_params, only: [:update]
+
+  # GET /resource/sign_up
+  def new
+    super
+  end
+
+  # POST /resource
+  def create
+    super
+  end
+
+  # GET /resource/edit
+  def edit
+    super
+  end
+
+  # PUT /resource
+  def update
+    super
+  end
+
+  # DELETE /resource
+  def destroy
+    super
+  end
+
+  # GET /resource/cancel
+  # Forces the session data which is usually expired after sign
+  # in to be expired now. This is useful if the user wants to
+  # cancel oauth signing in/up in the middle of the process,
+  # removing all OAuth session data.
+  def cancel
+    super
+  end
+
+  # protected
+
+  # If you have extra params to permit, append them to the sanitizer.
+  def configure_sign_up_params
+    devise_parameter_sanitizer.permit(:sign_up, keys: %i[name email password password_confirmation])
+  end
+
+  # If you have extra params to permit, append them to the sanitizer.
+  def configure_account_update_params
+    devise_parameter_sanitizer.permit(:account_update,
+                                      keys: %i[name email password password_confirmation current_password])
+  end
+
+  # The path used after sign up.
+  # def after_sign_up_path_for(resource)
+  #   super(resource)
+  # end
+
+  # The path used after sign up for inactive accounts.
+  # def after_inactive_sign_up_path_for(resource)
+  #   super(resource)
+  # end
+end
 ```
 
 # Rspec test Setup
@@ -780,6 +979,7 @@ $ rails generate rspec:install
 ```
 
 Create boilerplate specs with rails generate after coding is complete
+
 ```sh
 # RSpec also provides its own spec file generators
 $ rails generate rspec:model user
@@ -893,11 +1093,12 @@ end
 
 ```
 
-
 ```sh
 $ bundle exec rspec spec/models
 ```
-# Micropost rpesc test
+
+# Micropost rspec test
+
 1. This test should be in a file called micropost_spec.tb inside the spec/modles folder as shows bellow:
 ```ruby
 require 'rails_helper'
@@ -932,4 +1133,537 @@ $ bundle exec rspec spec/models
 
 Finished in 0.58586 seconds (files took 0.76588 seconds to load)
 10 examples, 0 failures
+``` 
+
+# Milestone 4: Comments & likes
+
+Create models with associations and implement all requested features for comments and likes.
+
+Remember about unit and integrations tests!
+
+1. Generate & setup comment model & DB
+```sh 
+$ rails generate model comment
+      invoke  active_record
+      create    db/migrate/20191212163355_create_comments.rb
+      create    app/models/comment.rb
+      invoke    test_unit
+      create      test/models/comment_test.rb
+      create      test/fixtures/comments.yml
 ```
+
+```ruby
+# app/model/comment.rb
+
+class Comment < ApplicationRecord
+  belongs_to :user
+  belongs_to :micropost
+  validates :replay, presence: true, length: { maximum: 255 }
+end
+```
+
+```ruby 
+# db/migrate/timestamp_create_comments.rb
+
+class CreateComments < ActiveRecord::Migration[6.0]
+  def change
+    create_table :comments do |t|
+      t.integer :user_id
+      t.integer :micropost_id
+      t.text :replay
+
+      t.timestamps
+    end
+  end
+end
+```
+
+```ruby
+# app/models/comment.rb
+
+class Comment < ApplicationRecord
+  belongs_to :user
+  belongs_to :micropost
+  validates :replay, presence: true, length: { maximum: 255 }
+end
+```
+
+** Run rails db:migrate command
+
+2. Generate & setup comments controller
+
+```sh
+$ rails generate controller comments
+      create  app/controllers/comments_controller.rb
+      invoke  erb
+      create    app/views/comments
+      invoke  test_unit
+      create    test/controllers/comments_controller_test.rb
+      invoke  helper
+      create    app/helpers/comments_helper.rb
+      invoke    test_unit
+      invoke  assets
+      invoke    scss
+      create      app/assets/stylesheets/comments.scss
+```
+```ruby
+# app/controllers/comments_controller.rb
+
+class CommentsController < ApplicationController
+  before_action :set_post, only: %i[edit update destroy]
+  before_action :authenticate_user!
+
+  def create
+    #current_user
+    #current micropost
+    #create comment for that
+    #save it
+    @post = Micropost.find(params[:comment][:micropost_id])
+    @comments = @post.comments
+    @comment = @post.comments.build(comment_params)
+    if @comment.save
+      redirect_back(fallback_location: microposts_path)
+    else
+      flash[:alert] = "Check the comment form"
+			redirect_to root_path
+    end
+  end
+
+  def destroy
+  end
+
+  def edit
+  end
+
+  def update
+  end
+
+  private
+    def comment_params
+      params.require(:comment).permit(:user_id, :micropost_id, :replay)
+    end
+
+    def set_post
+      @comment = Comment.find(params[:id])
+    end
+
+end
+
+```
+
+** Run rails db:migrate command
+
+3. Generate & setup like model & DB
+```sh
+$ rails generate model like
+      invoke  active_record
+      create    db/migrate/20191212164601_create_likes.rb
+      create    app/models/like.rb
+      invoke    test_unit
+      create      test/models/like_test.rb
+      create      test/fixtures/likes.yml
+```
+
+```ruby
+# app/model/like.rb
+
+class Like < ApplicationRecord
+  belongs_to :micropost
+  belongs_to :user
+
+  validates :user_id, uniqueness: { scope: :micropost_id }
+end
+```
+
+```ruby
+# db/migrate/timestamp_create_likes.rb
+
+class CreateLikes < ActiveRecord::Migration[6.0]
+  def change
+    create_table :likes do |t|
+      t.references :user
+      t.references :micropost
+
+      t.timestamps
+    end
+  end
+end
+```
+
+4. Generate & setup likes controller
+
+```sh
+$ rails generate controller likes
+      create  app/controllers/likes_controller.rb
+      invoke  erb
+      create    app/views/likes
+      invoke  test_unit
+      create    test/controllers/likes_controller_test.rb
+      invoke  helper
+      create    app/helpers/likes_helper.rb
+      invoke    test_unit
+      invoke  assets
+      invoke    scss
+      create      app/assets/stylesheets/likes.scss
+```
+
+```ruby
+class LikesController < ApplicationController
+  before_action :find_post
+  before_action :find_like, only: [:destroy]
+  
+  def create
+    if already_liked?
+      flash[:notice] = "You can't like more than once"
+    else
+      @post.likes.create(user_id: current_user.id)
+    end
+    redirect_to microposts_path
+  end
+
+  def destroy
+    if !(already_liked?)
+      flash[:notice] = "Cannot unlike"
+    else
+      @like.destroy
+    end
+    redirect_to microposts_path
+  end
+
+  private
+
+  def find_post
+    @post = Micropost.find(params[:micropost_id])
+  end
+
+  def find_like
+    @like = @post.likes.find(params[:id])
+  end
+
+  def already_liked?
+    Like.where(user_id: current_user.id, micropost_id:
+    params[:micropost_id]).exists?
+  end
+end
+```
+
+5. Setup views for comments & likes
+
+* add font awesome
+```erb
+# views/layouts/application.html.erb
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Societalbook</title>
+    <%= csrf_meta_tags %>
+    <%= csp_meta_tag %>
+
+    <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
+    <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.css" rel="stylesheet">
+    
+  </head>
+
+  <body>
+    <div class="container">
+      <%# <%= render 'layouts/nav' %>
+      <%= render "partials/nav"%>
+        <% if notice %>
+          <p class="notification is-success">
+            <button class="delete"></button>
+            <%= notice %>
+          </p>
+        <% end %>
+        <% if alert %>
+          <p class="notification is-danger">
+            <button class="delete"></button>
+            <%= alert %>
+          </p>
+        <% end %>
+      <%= yield %>
+    </div>
+  </body>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+        $notification = $delete.parentNode;
+        $delete.addEventListener('click', () => {
+          $notification.parentNode.removeChild($notification);
+        });
+      });
+    });
+  </script>
+</html>
+```
+```erb
+# app/views/micropost/_feed.html.erb
+<% @posts.each do |p| %>
+<article class="media">
+  <figure class="media-left">
+    <p class="image is-64x64">
+      <%= link_to gravatar_for(current_user, size: 50)%>
+    </p>
+  </figure>
+  <div class="media-content">
+    <div class="content">
+      <p>
+        <strong><%= p.user.name %></strong>
+        <br>
+        <%= p.content %>
+      </p>
+    </div>
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <a class="level-item">
+          <span class="icon is-small"><%=fa_icon "reply-all"%></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small"><%=fa_icon "retweet"%></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small">
+          <% pre_like = p.likes.find { |like| like.user_id == current_user.id} %>
+          <% if pre_like %>
+            <%= link_to fa_icon("thumbs-down"), micropost_like_path(p.id, pre_like), method: :delete %>
+          <% else %>
+            <%= link_to fa_icon("thumbs-up"), micropost_likes_path(micropost_id: p.id), method: :post %>
+          <% end %>              
+          </span>
+          <p><%= p.likes.count %> <%= (p.likes.count) == 1 ? 'Like' : 'Likes'%></p>
+        </a>
+      </div>
+    </nav>
+
+    <% @comments.each do |c| %>
+    <% if p.id == c.micropost_id %>
+      <div class="media-right">
+        <button class="micropost delete"></button>
+      </div>
+      <article class="media">
+        <figure class="media-left">
+          <p class="image is-64x64">
+            <%= link_to gravatar_for(current_user, size: 50)%>
+          </p>
+        </figure>
+        <div class="media-content">
+          <div class="content">
+            <p>
+              <strong><%= c.user.name %></strong>
+              <br>
+              <%= c.replay %>
+            </p>
+          </div>
+          <nav class="level is-mobile">
+            <div class="level-left">
+              <a class="level-item">
+                <span class="icon is-small"><%=fa_icon "reply-all"%></span>
+              </a>
+              <a class="level-item">
+                <span class="icon is-small"><%=fa_icon "retweet"%></span>
+              </a>
+              <a class="level-item">
+                <span class="icon is-small"><%=fa_icon "thumbs-down"%></span>
+              </a>
+            </div>
+          </nav>
+        </div>
+        <div class="media-right">
+          <button class="micropost delete"></button>
+        </div>
+
+      </article>
+    <%end%>
+    <%end%>
+    <%= form_with(model: @comment, local: true) do |c| %>
+
+      <div class="field">
+        <%= c.hidden_field :user_id, value:current_user.id%>
+        <%= c.hidden_field :micropost_id, value:p.id%>
+        <%= c.label :replay, "What is your comment ?", class: "label" %>
+        <%= c.text_area :replay, class: "textarea", rows: "2", placeholder: 'Add a comment...' %>
+      </div>
+
+      <div>
+        <%= c.submit "Save", class: "button is-dark is-fullwidth" %>
+      </div>
+    <% end %>
+  </div>
+</article>
+<%end%>
+
+```
+```erb
+# app/views/micropost/_form.html.erb
+<%= form_with(model: @post, local: true) do |form| %>
+  <div class="field">
+    <%= form.label :content, "What's on your mind ?", class: "label" %>
+    <%= form.text_area :content, class: "textarea", placeholder: 'Add a micropost...' %>
+  </div>
+  <div>
+    <%= form.submit "Save", class: "button is-dark is-fullwidth" %>
+  /div>
+<% end %>
+
+```
+```erb
+# app/views/micropost/_post.html.erb
+
+```
+```erb
+# app/views/microposts/edit.html.erb
+<div class="small-container center-block">
+  <%= render "microposts/form" %>
+</div>
+```
+```erb
+# app/views/microposts/index.html.erb
+<div class="hero">
+  <div class="hero-body">
+    <div class="container">
+      <% if signed_in? %>
+        <div class="columns">
+          <div class="column is-one-third">
+            <section class="micropost_form">
+              <%= render "form" %>
+            </section>
+          </div>
+          <div class="column is-two-third">
+            <h3>Micropost Feed</h3>
+            <%= render "feed" %>
+          </div>
+        </div>
+      <%end%>
+    </div>
+  </div>
+</div>
+```
+```erb
+# app/views/microposts/new.html.erb
+<div class="columns is-mobile">
+  <div class="column is-half is-offset-one-quarter">
+    <%= render "microposts/form" %>
+  </div>
+</div>
+```
+```erb
+# app/views/microposts/show.html.erb
+<div>
+  <%= @post.content %>
+</div>
+
+<div>
+  <%= link_to "Delete Post", @post, method: :delete%>
+</div>
+```
+```erb
+# app/views/partials/error_messages.html.erb
+
+<% if object.errors.any? %>
+  <div id="error_explanation">
+    <div class="alert alert-danger">
+      The form contains <%= pluralize(object.errors.count, "error") %>.
+    </div>
+    <ul>
+    <% object.errors.full_messages.each do |msg| %>
+      <li><%= msg %></li>
+    <% end %>
+    </ul>
+  </div>
+<% end %>
+```
+```erb
+# app/views/partials/_nav.erb
+<nav class="navbar" role="navigation" aria-label="main navigation">
+  <div class="navbar-brand">
+    <a class="navbar-item" href="#">
+      <p>SocietalBook</p>
+    </a>
+
+    <a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="navbarBasicExample">
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+      <span aria-hidden="true"></span>
+    </a>
+  </div>
+
+  <div id="navbarBasicExample" class="navbar-menu">
+    <div class="navbar-start">
+
+      <%= link_to 'Home', root_path, class: "navbar-item"%>
+
+      <%= link_to 'Micropost', microposts_path, class: "navbar-item"%>
+
+      <div class="navbar-item has-dropdown is-hoverable">
+        <a class="navbar-link">
+          More
+        </a>
+
+        <div class="navbar-dropdown">
+          <a class="navbar-item">
+            Option 1
+          </a>
+          <a class="navbar-item">
+            Option 2
+          </a>
+          <a class="navbar-item">
+            Option 3
+          </a>
+          <hr class="navbar-divider">
+          <a class="navbar-item">
+            Need help?
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <div class="navbar-end">
+      <div class="navbar-item">
+        <div class="buttons">
+          <% if user_signed_in? %>
+        			<%= link_to 'Sign out', destroy_user_session_path, class: "button is-primary", method: :delete %>
+          <% else %>
+              <strong>
+                <%= link_to 'Sign up', new_user_registration_path, class: "button is-primary" %>
+              </strong>
+              <strong>
+                <%= link_to 'Sign in', new_user_session_path, class: "button is-light" %>
+              </strong>
+        	<% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+
+```
+
+6. Setup routes for comments & likes
+```ruby
+Rails.application.routes.draw do
+  devise_for :users, controllers: { registrations: 'users/registrations' }
+
+  resources :microposts, only: %i[create destroy index show] do
+    resources :likes, only: %i[create destroy]
+  end
+  resources :comments, only: [:create, :destroy, :update, :edit]
+  
+end
+
+```
+
+```erb
+# app/views/partials/
+
+```
+```erb
+# app/views/partials/
+
+```
+```erb
+# app/views/partials/
+
+```
+reference for like/unlike: https://medium.com/full-taxx/how-to-add-likes-to-posts-in-rails-e81430101bc2
+** Note: For "<% link_to : "", ---_path %>" copy path from Rails Routes command. 

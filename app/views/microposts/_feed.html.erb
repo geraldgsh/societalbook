@@ -8,7 +8,7 @@
   <div class="media-content">
     <div class="content">
       <p>
-        <strong><%= current_user.name %></strong>
+        <strong><%= p.user.name %></strong>
         <br>
         <%= p.content %>
       </p>
@@ -16,14 +16,21 @@
     <nav class="level is-mobile">
       <div class="level-left">
         <a class="level-item">
-          <span class="icon is-small"><%=fa_icon "reply-all"%></i></span>
+          <span class="icon is-small"><%=fa_icon "reply-all"%></span>
         </a>
         <a class="level-item">
-          <span class="icon is-small"><%=fa_icon "retweet"%></i></span>
+          <span class="icon is-small"><%=fa_icon "retweet"%></span>
         </a>
         <a class="level-item">
-          <span class="icon is-small"><%=fa_icon "heart"%></i></span>
-
+          <span class="icon is-small">
+          <% pre_like = p.likes.find { |like| like.user_id == current_user.id} %>
+          <% if pre_like %>
+            <%= link_to fa_icon("thumbs-down"), micropost_like_path(p.id, pre_like), method: :delete %>
+          <% else %>
+            <%= link_to fa_icon("thumbs-up"), micropost_likes_path(micropost_id: p.id), method: :post %>
+          <% end %>              
+          </span>
+          <p><%= p.likes.count %> <%= (p.likes.count) == 1 ? 'Like' : 'Likes'%></p>
         </a>
       </div>
     </nav>
@@ -42,7 +49,7 @@
         <div class="media-content">
           <div class="content">
             <p>
-              <strong><%= current_user.name %></strong>
+              <strong><%= c.user.name %></strong>
               <br>
               <%= c.replay %>
             </p>
@@ -50,13 +57,13 @@
           <nav class="level is-mobile">
             <div class="level-left">
               <a class="level-item">
-                <span class="icon is-small"><%=fa_icon "reply-all"%></i></span>
+                <span class="icon is-small"><%=fa_icon "reply-all"%></span>
               </a>
               <a class="level-item">
-                <span class="icon is-small"><%=fa_icon "retweet"%></i></span>
+                <span class="icon is-small"><%=fa_icon "retweet"%></span>
               </a>
               <a class="level-item">
-                <span class="icon is-small"><%=fa_icon "heart"%></span>
+                <span class="icon is-small"><%=fa_icon "thumbs-down"%></span>
               </a>
             </div>
           </nav>
@@ -71,10 +78,10 @@
     <%= form_with(model: @comment, local: true) do |c| %>
 
       <div class="field">
-        <%= c.hidden_field :user_id, value:p.user_id%>
+        <%= c.hidden_field :user_id, value:current_user.id%>
         <%= c.hidden_field :micropost_id, value:p.id%>
         <%= c.label :replay, "What is your comment ?", class: "label" %>
-        <%= c.text_area :replay, class: "textarea" %>
+        <%= c.text_area :replay, class: "textarea", rows: "2", placeholder: 'Add a comment...' %>
       </div>
 
       <div>

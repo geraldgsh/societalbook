@@ -7,6 +7,7 @@ class MicropostsController < ApplicationController
 		@post = Micropost.new
 		@comments = Comment.all
 		@comment = Comment.new
+		@likes = Like.all
 	end
 
 	def show
