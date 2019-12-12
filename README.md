@@ -439,7 +439,7 @@ $ rails generate controller home
     <title>Societalbook</title>
     <%= csrf_meta_tags %>
     <%= csp_meta_tag %>
-    
+
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
     <link href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
@@ -1133,7 +1133,7 @@ $ bundle exec rspec spec/models
 
 Finished in 0.58586 seconds (files took 0.76588 seconds to load)
 10 examples, 0 failures
-``` 
+```
 
 # Milestone 4: Comments & likes
 
@@ -1142,7 +1142,7 @@ Create models with associations and implement all requested features for comment
 Remember about unit and integrations tests!
 
 1. Generate & setup comment model & DB
-```sh 
+```sh
 $ rails generate model comment
       invoke  active_record
       create    db/migrate/20191212163355_create_comments.rb
@@ -1162,7 +1162,7 @@ class Comment < ApplicationRecord
 end
 ```
 
-```ruby 
+```ruby
 # db/migrate/timestamp_create_comments.rb
 
 class CreateComments < ActiveRecord::Migration[6.0]
@@ -1311,7 +1311,7 @@ $ rails generate controller likes
 class LikesController < ApplicationController
   before_action :find_post
   before_action :find_like, only: [:destroy]
-  
+
   def create
     if already_liked?
       flash[:notice] = "You can't like more than once"
@@ -1363,7 +1363,7 @@ end
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.css" rel="stylesheet">
-    
+
   </head>
 
   <body>
@@ -1648,7 +1648,7 @@ Rails.application.routes.draw do
     resources :likes, only: %i[create destroy]
   end
   resources :comments, only: [:create, :destroy, :update, :edit]
-  
+
 end
 
 ```
@@ -1666,4 +1666,82 @@ end
 
 ```
 reference for like/unlike: https://medium.com/full-taxx/how-to-add-likes-to-posts-in-rails-e81430101bc2
-** Note: For "<% link_to : "", ---_path %>" copy path from Rails Routes command. 
+** Note: For "<% link_to : "", ---_path %>" copy path from Rails Routes command.
+ 7. Performing Unit test for likes and comments with rspec as shown bellow:
+ ```ruby
+ #societalbook/spec/models/like_spec.rb
+ require 'rails_helper'
+
+ RSpec.describe Like, type: :model do
+   before :each do
+     @user = User.create(name: 'test', email: 'test@test.com',
+                       password: '123456')
+     @post = @user.microposts.create(content: 'test post')
+   end
+
+   it 'should have micropost_id' do
+    @like = @user.likes.build
+    @like.valid?
+    expect(@like.errors[:micropost]).to include('must exist')
+
+    @like = @user.likes.build(micropost_id: @post.id)
+    expect(@like.valid?).to eql(true)
+  end
+
+  it 'should have user_id' do
+   @like = @post.likes.build
+   @like.valid?
+   expect(@like.errors[:user]).to include('must exist')
+
+   @like = @post.likes.build(user_id: @user.id)
+   expect(@like.valid?).to eql(true)
+   end
+
+   it 'cant be on same post twice from same user' do
+     @like = @post.likes.create(user_id: @user.id)
+
+     @like2 = @post.likes.build(user_id: @user.id)
+     expect(@like2.valid?).to eql(false)
+     expect(@like2.errors[:user_id]).to include('has already been taken')
+   end
+ end
+
+```
+```ruby
+#societalbook/spec/models/comment_spec.rb
+require 'rails_helper'
+
+RSpec.describe Like, type: :model do
+  before :each do
+    @user = User.create(name: 'test', email: 'test@test.com',
+                      password: '123456')
+    @post = @user.microposts.create(content: 'test post')
+  end
+
+  it 'should have micropost_id' do
+   @like = @user.likes.build
+   @like.valid?
+   expect(@like.errors[:micropost]).to include('must exist')
+
+   @like = @user.likes.build(micropost_id: @post.id)
+   expect(@like.valid?).to eql(true)
+ end
+
+ it 'should have user_id' do
+  @like = @post.likes.build
+  @like.valid?
+  expect(@like.errors[:user]).to include('must exist')
+
+  @like = @post.likes.build(user_id: @user.id)
+  expect(@like.valid?).to eql(true)
+  end
+
+  it 'cant be on same post twice from same user' do
+    @like = @post.likes.create(user_id: @user.id)
+
+    @like2 = @post.likes.build(user_id: @user.id)
+    expect(@like2.valid?).to eql(false)
+    expect(@like2.errors[:user_id]).to include('has already been taken')
+  end
+end
+```
