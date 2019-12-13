@@ -16,5 +16,6 @@ Rails.application.routes.draw do
   resources :comments, only: [:create, :destroy, :update, :edit]
   authenticated :user do
     get 'users/:user_id/friends', to: 'users#friends', as: 'users_friends'
+    get 'users', to: 'users#index', as: 'users'
   end
 end
