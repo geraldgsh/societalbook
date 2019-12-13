@@ -27,15 +27,13 @@ class MicropostsController < ApplicationController
 	end
 
 	def create
-    puts "#$$$$$$$$$$$$$$ #{current_user}"
 		@post = current_user.microposts.create(content: params[:micropost][:content])
 		redirect_to microposts_url
-		# render json: @post
 	end
 
 	def destroy
 		@post.destroy
-		redirect_to root_path
+		redirect_to microposts_path
 	end
 
 	def find_post

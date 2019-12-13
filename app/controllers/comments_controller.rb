@@ -3,10 +3,6 @@ class CommentsController < ApplicationController
   before_action :authenticate_user!
 
   def create
-    #current_user
-    #current micropost
-    #create comment for that
-    #save it
     @post = Micropost.find(params[:comment][:micropost_id])
     @comments = @post.comments
     @comment = @post.comments.build(comment_params)
@@ -19,6 +15,8 @@ class CommentsController < ApplicationController
   end
 
   def destroy
+    @comment.destroy
+		redirect_to microposts_path
   end
 
   def edit
