@@ -17,6 +17,7 @@
       <%= link_to 'Home', root_path, class: "navbar-item"%>
 
       <%= link_to 'Micropost', microposts_path, class: "navbar-item"%>
+      <%= link_to 'Friends List', users_friends_path(current_user), class: "navbar-item"%>
 
       <div class="navbar-item has-dropdown is-hoverable">
         <a class="navbar-link">
@@ -25,7 +26,7 @@
 
         <div class="navbar-dropdown">
           <a class="navbar-item">
-            Option 1
+            Friends List
           </a>
           <a class="navbar-item">
             Option 2

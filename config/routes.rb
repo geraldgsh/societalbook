@@ -14,5 +14,7 @@ Rails.application.routes.draw do
     resources :likes, only: %i[create destroy]
   end
   resources :comments, only: [:create, :destroy, :update, :edit]
-  
+  authenticated :user do
+    get 'users/:user_id/friends', to: 'users#friends', as: 'users_friends'
+  end
 end
