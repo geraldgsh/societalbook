@@ -1,0 +1,98 @@
+<% @posts.each do |p| %>
+<article class="media">
+  <figure class="media-left">
+    <p class="image is-64x64">
+      <%= link_to gravatar_for(current_user, size: 50)%>
+    </p>
+  </figure>
+  <div class="media-content">
+    <div class="content">
+      <p>
+        <strong><%= p.user.name %></strong>
+        <br>
+        <%= p.content %>
+      </p>
+    </div>
+    <nav class="level is-mobile">
+      <div class="level-left">
+        <a class="level-item">
+          <span class="icon is-small"><%=fa_icon "reply-all"%></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small"><%=fa_icon "retweet"%></span>
+        </a>
+        <a class="level-item">
+          <span class="icon is-small">
+          <% pre_like = p.likes.find { |like| like.user_id == current_user.id} %>
+          <% if pre_like %>
+            <%= link_to fa_icon("thumbs-down"), micropost_like_path(p.id, pre_like), method: :delete %>
+          <% else %>
+            <%= link_to fa_icon("thumbs-up"), micropost_likes_path(micropost_id: p.id), method: :post %>
+          <% end %>              
+          </span>
+          <p><%= p.likes.count %> <%= (p.likes.count) == 1 ? 'Like' : 'Likes'%></p>
+        </a>
+      </div>
+      <div class="media-right">
+      <% if p.user.id == current_user.id %>
+        <%= link_to fa_icon("trash"), p, method: :delete %>
+      <% else %>
+        <%= link_to fa_icon(" ") %>
+      <% end %>
+      </div>
+    </nav>
+
+    <% @comments.each do |c| %>
+    <% if p.id == c.micropost_id %>      
+      <article class="media">
+        <figure class="media-left">
+          <p class="image is-64x64">
+            <%= link_to gravatar_for(current_user, size: 50)%>
+          </p>
+        </figure>
+        <div class="media-content">
+          <div class="content">
+            <p>
+              <strong><%= c.user.name %></strong>
+              <br>
+              <%= c.replay %>
+            </p>
+          </div>
+          <nav class="level is-mobile">
+            <div class="level-left">
+              <a class="level-item">
+                <span class="icon is-small"><%=fa_icon "reply-all"%></span>
+              </a>
+              <a class="level-item">
+                <span class="icon is-small"><%=fa_icon "retweet"%></span>
+              </a>
+              <a class="level-item">
+                <span class="icon is-small"><%=fa_icon "thumbs-down"%></span>
+              </a>
+            </div>
+          </nav>
+        </div>
+        <% if c.user.id == current_user.id %>
+          <%= link_to fa_icon("trash"), c, method: :delete %>
+        <% else %>
+          <%= link_to fa_icon(" ") %>
+        <% end %>
+      </article>
+    <%end%>
+    <%end%>
+    <%= form_with(model: @comment, local: true) do |c| %>
+
+      <div class="field">
+        <%= c.hidden_field :user_id, value:current_user.id%>
+        <%= c.hidden_field :micropost_id, value:p.id%>
+        <%= c.label :replay, "What is your comment ?", class: "label" %>
+        <%= c.text_area :replay, class: "textarea", rows: "2", placeholder: 'Add a comment...' %>
+      </div>
+
+      <div>
+        <%= c.submit "Save", class: "button is-dark is-fullwidth" %>
+      </div>
+    <% end %>
+  </div>
+</article>
+<%end%>
