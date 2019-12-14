@@ -1891,7 +1891,7 @@ Friendship.all
 2.6.5 :014 > u2.friend?(u1)
   Friendship Load (1.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."user_id" = $1  [["user_id", 2]]
   Friendship Load (3.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."friend_id" = $1  [["friend_id", 2]]
- => false
+ => true
 
 2.6.5 :015 > u1.friend?(u2)
   Friendship Load (1.6ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."user_id" = $1  [["user_id", 1]]
@@ -1927,6 +1927,12 @@ u2.confirm_friend(u1)
    (40.3ms)  COMMIT
  => true
 
+# Check friend's name
 
+2.6.5 :025 > u1.friends[0].name
+  Friendship Load (1.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."user_id" = $1  [["user_id", 1]]
+  User Load (3.1ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 2], ["LIMIT", 1]]
+  Friendship Load (1.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."friend_id" = $1  [["friend_id", 1]]
+ => "robin"
 
 ```
