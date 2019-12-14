@@ -1817,7 +1817,7 @@ class User < ApplicationRecord
 .
   def friends
     friends_array = friendships.map{|friendship| friendship.friend if friendship.status}
-    friends_array + inverse_friendships.map{|friendship| friendship.user if friendship.status}
+    friends_array += inverse_friendships.map{|friendship| friendship.user if friendship.status}
     friends_array.compact
   end
 
@@ -1936,3 +1936,6 @@ u2.confirm_friend(u1)
  => "robin"
 
 ```
+
+5. Micropost Image Upload
+
