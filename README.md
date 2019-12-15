@@ -1209,46 +1209,43 @@ $ rails generate controller comments
 ```ruby
 # app/controllers/comments_controller.rb
 
+# frozen_string_literal: true
+
 class CommentsController < ApplicationController
   before_action :set_post, only: %i[edit update destroy]
   before_action :authenticate_user!
 
   def create
-    #current_user
-    #current micropost
-    #create comment for that
-    #save it
     @post = Micropost.find(params[:comment][:micropost_id])
     @comments = @post.comments
     @comment = @post.comments.build(comment_params)
     if @comment.save
       redirect_back(fallback_location: microposts_path)
     else
-      flash[:alert] = "Check the comment form"
-			redirect_to root_path
+      flash[:alert] = 'Check the comment form'
+      redirect_to root_path
     end
   end
 
   def destroy
+    @comment.destroy
+    redirect_to microposts_path
   end
 
-  def edit
-  end
+  def edit; end
 
-  def update
-  end
+  def update; end
 
   private
-    def comment_params
-      params.require(:comment).permit(:user_id, :micropost_id, :replay)
-    end
 
-    def set_post
-      @comment = Comment.find(params[:id])
-    end
+  def comment_params
+    params.require(:comment).permit(:user_id, :micropost_id, :replay)
+  end
 
+  def set_post
+    @comment = Comment.find(params[:id])
+  end
 end
-
 ```
 
 ** Run rails db:migrate command
@@ -1939,3 +1936,159 @@ u2.confirm_friend(u1)
 
 5. Micropost Image Upload
 
+To handle an uploaded image and associate it with the Micropost model, we’ll use the CarrierWave image uploader. To get started, we need to include the carrierwave and mini_magick gems in the Gemfile.
+
+```sh
+# gemfile
+
+source 'https://rubygems.org'
+.
+.
+gem 'carrierwave', '~> 2.0', '>= 2.0.2'
+gem 'mini_magick', '~> 4.9', '>= 4.9.5'
+.
+.
+end
+```
+```sh
+$ bundle install
+```
+
+CarrierWave adds a Rails generator for creating an image uploader, which we’ll use to make an uploader for an image called picture.
+
+```sh
+$ rails generate uploader Picture
+      create  app/uploaders/picture_uploader.rb
+```
+
+Images uploaded with CarrierWave should be associated with a corresponding attribute in an Active Record model, which simply contains the name of the image file in a string field. 
+
+To add the required picture attribute to the Micropost model, we generate a migration and migrate the development database:
+
+```sh
+$ rails generate migration add_picture_to_microposts picture:string
+      invoke  active_record
+      create    db/migrate/20191214211030_add_picture_to_microposts.rb
+
+$ rails db:migrate
+== 20191214211030 AddPictureToMicroposts: migrating ===========================
+-- add_column(:microposts, :picture, :string)
+   -> 0.0832s
+== 20191214211030 AddPictureToMicroposts: migrated (0.0839s) ==================
+```
+
+The way to tell CarrierWave to associate the image with a model is to use the mount_uploader method, which takes as arguments a symbol representing the attribute and the class name of the generated uploader:
+
+```sh
+mount_uploader :picture, PictureUploader
+```
+
+Here PictureUploader is defined in the file picture_uploader.rb, which we’ll start editing in Section 13.4.2, but for now the generated default is fine. Adding the uploader to the Micropost model gives the code shown below;
+
+```ruby
+class Micropost < ApplicationRecord
+.
+.
+  mount_uploader :picture, PictureUploader
+.
+.
+end
+
+```
+
+To include the uploader on the form page
+
+```erb
+# app/views/microposts/_form.html.erb
+
+<%= form_with(model: @post, local: true) do |form| %>
+.
+.
+  <span class="picture">
+    <%= form.file_field :picture %>
+  </span>
+<% end %>
+```
+
+Finally, we need to add picture to the list of attributes permitted to be modified through the web. This involves editing the micropost_params method, as shown below;
+
+```ruby
+
+# Image validation
+
+The first image validation, which restricts uploads to valid image types, appears in the CarrierWave uploader itself. The resulting code (which appears as a commented-out suggestion in the generated uploader) verifies that the image filename ends with a valid image extension (PNG, GIF, and both variants of JPEG), as shown below;
+
+```ruby
+# app/uploaders/picture_uploader.rb
+
+class PictureUploader < CarrierWave::Uploader::Base
+  storage :file
+
+  # Override the directory where uploaded files will be stored.
+  # This is a sensible default for uploaders that are meant to be mounted:
+  def store_dir
+    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+  end
+
+  # Add a white list of extensions which are allowed to be uploaded.
+  def extension_whitelist
+    %w(jpg jpeg gif png)
+  end
+end
+```
+
+The second validation, which controls the size of the image, appears in the Micropost model itself. In contrast to previous model validations, file size validation doesn’t correspond to a built-in Rails validator. As a result, validating images requires defining a custom validation, which we’ll call picture_size and define as shown below
+
+```ruby
+# app/models/micropost.rb
+class Micropost < ApplicationRecord
+.
+.
+  validate  :picture_size
+
+  private
+
+  # Validates the size of an uploaded picture.
+  def picture_size
+    if picture.size > 5.megabytes
+      errors.add(:picture, "should be less than 5MB")
+    end
+  end
+end
+```
+
+This custom validation arranges to call the method corresponding to the given symbol (:picture_size). In picture_size itself, we add a custom error message to the errors collection.
+
+Add two client-side checks on the uploaded image. We’ll first mirror the format validation by using the accept parameter in the file_field input tag:
+
+```sh
+<%= form.file_field :picture, accept: 'image/jpeg,image/gif,image/png' %>
+```
+
+Include a little JavaScript (or, more specifically, jQuery) to issue an alert if a user tries to upload an image that’s too big (which prevents accidental time-consuming uploads and lightens the load on the server).
+
+```sh
+# app/views/shared/_micropost_form.html.erb
+.
+.
+  <span class="picture">
+    <%= f.file_field :picture, accept: 'image/jpeg,image/gif,image/png' %>
+  </span>
+<% end %>
+.
+.
+<script type="text/javascript">
+  $('#micropost_picture').bind('change', function() {
+    var size_in_megabytes = this.files[0].size/1024/1024;
+    if (size_in_megabytes > 5) {
+      alert('Maximum file size is 5MB. Please choose a smaller file.');
+    }
+  });
+</script>
+```
+
+# Image resizing
+
+It’s also a good idea to resize the images before displaying them.
+
+```sh

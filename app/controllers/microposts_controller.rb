@@ -26,19 +26,29 @@ class MicropostsController < ApplicationController
 		@post = current_user.posts.build
 	end
 
-	def create
-    puts "#$$$$$$$$$$$$$$ #{current_user}"
-		@post = current_user.microposts.create(content: params[:micropost][:content])
-		redirect_to microposts_url
-		# render json: @post
-	end
+  def create
+    @micropost = current_user.microposts.build(micropost_params)
+    if @micropost.save
+      flash[:success] = "Micropost created!"
+      redirect_to microposts_url
+		else
+			flash[:error] = "Micropost created!"
+      render root_url
+    end
+  end
 
 	def destroy
 		@post.destroy
-		redirect_to root_path
+		redirect_to microposts_path
 	end
 
 	def find_post
 		@post = Micropost.find(params[:id])
 	end
+
+  private
+
+    def micropost_params
+      params.require(:micropost).permit(:content, :picture)
+    end
 end

@@ -11,6 +11,8 @@
         <strong><%= p.user.name %></strong>
         <br>
         <%= p.content %>
+        <br>
+        <%= image_tag p.picture.url if p.picture? %>
       </p>
     </div>
     <nav class="level is-mobile">
@@ -33,13 +35,17 @@
           <p><%= p.likes.count %> <%= (p.likes.count) == 1 ? 'Like' : 'Likes'%></p>
         </a>
       </div>
+      <div class="media-right">
+      <% if p.user.id == current_user.id %>
+        <%= link_to fa_icon("trash"), p, method: :delete %>
+      <% else %>
+        <%= link_to fa_icon(" ") %>
+      <% end %>
+      </div>
     </nav>
 
     <% @comments.each do |c| %>
-    <% if p.id == c.micropost_id %>
-      <div class="media-right">
-        <button class="micropost delete"></button>
-      </div>
+    <% if p.id == c.micropost_id %>      
       <article class="media">
         <figure class="media-left">
           <p class="image is-64x64">
@@ -68,10 +74,11 @@
             </div>
           </nav>
         </div>
-        <div class="media-right">
-          <button class="micropost delete"></button>
-        </div>
-
+        <% if c.user.id == current_user.id %>
+          <%= link_to fa_icon("trash"), c, method: :delete %>
+        <% else %>
+          <%= link_to fa_icon(" ") %>
+        <% end %>
       </article>
     <%end%>
     <%end%>
