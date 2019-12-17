@@ -2092,3 +2092,16 @@ Include a little JavaScript (or, more specifically, jQuery) to issue an alert if
 It’s also a good idea to resize the images before displaying them.
 
 ```sh
+$ sudo apt install php php-common gcc
+$ sudo apt install imagemagick
+```
+
+Include CarrierWave’s MiniMagick interface for ImageMagick, together with a resizing command.
+
+```sh
+class PictureUploader < CarrierWave::Uploader::Base
+  include CarrierWave::MiniMagick
+  process resize_to_limit: [400, 400]
+.
+.
+```
