@@ -23,12 +23,12 @@
 
       <%= link_to 'Users',users_path, class: "navbar-item"%>
 
-
-      <a class="navbar-item" href="<%=users_path%>">
-        <p>Notifications</p>
-        &nbsp;<span class="tag is-danger is-rounded"> 23</span>
-      </a>
-
+      <% if user_signed_in? %>
+        <a class="navbar-item" href="<%=user_friend_requests_path%>">
+          <p>Notifications</p>
+          &nbsp;<span class="tag is-danger is-rounded"> <%=current_user.pending_friends.count%></span>
+        </a>
+      <%end%>
 
       <div class="navbar-item has-dropdown is-hoverable">
         <a class="navbar-link">

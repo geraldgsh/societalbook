@@ -1608,7 +1608,7 @@ end
             Option 3
           </a>
           <hr class="navbar-divider">
-          <a class="navbar-item">
+          <a•••• class="navbar-item">
             Need help?
           </a>
         </div>
@@ -1718,7 +1718,7 @@ RSpec.describe Like, type: :model do
   it 'should have micropost_id' do
    @like = @user.likes.build
    @like.valid?
-   expect(@like.errors[:micropost]).to include('must exist')
+   expect(@l••••ike.errors[:micropost]).to include('must exist')
 
    @like = @user.likes.build(micropost_id: @post.id)
    expect(@like.valid?).to eql(true)
@@ -1961,7 +1961,7 @@ $ rails generate uploader Picture
       create  app/uploaders/picture_uploader.rb
 ```
 
-Images uploaded with CarrierWave should be associated with a corresponding attribute in an Active Record model, which simply contains the name of the image file in a string field. 
+Images uploaded with CarrierWave should be associated with a corresponding attribute in an Active Record model, which simply contains the name of the image file in a string field.
 
 To add the required picture attribute to the Micropost model, we generate a migration and migrate the development database:
 
@@ -1996,7 +1996,7 @@ end
 
 ```
 
-To include the uploader on the form page
+To include the uploader on the form friendshippage
 
 ```erb
 # app/views/microposts/_form.html.erb
