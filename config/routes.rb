@@ -20,6 +20,6 @@ Rails.application.routes.draw do
     get 'friend_requests/', to: 'users#friend_requests', as: 'user_friend_requests'
     post 'friend_request/:requestee_user_id', to: 'friendships#create', as: 'friend_request'
     put 'friend_requests/:requestee_user_id/:requested_user_id', to: 'friendships#accept', as: 'accept_friend_request'
-    delete 'friend_requests/:requesting_user_id/:requested_user_id', to: 'friendships#delete', as: 'delete_friend_request'
+    delete 'friend_requests/:requester_user_id/:requestee_user_id', to: 'friendships#delete', as: 'delete_friend_request'
   end
 end

@@ -24,6 +24,7 @@
       </div>
       <footer>
         <%= link_to "Accept Request", accept_friend_request_path(user.id, current_user.id), method: :put, class:"button  is-link is-fullwidth" %>
+        <%= link_to "Cancel request", delete_friend_request_path(user.id, current_user.id), method: :delete, class:"button  is-danger is-link is-fullwidth" %>
       </footer>
     </div>
     </div>
