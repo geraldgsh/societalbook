@@ -1,5 +1,5 @@
 <div class="columns is-multiline is-mobile">
-  <% @friend_requests.each do |user| %>
+  <% current_user.friend_requests.each do |user| %>
    <div class="row column is-one-third">
     <div class="card has-background-light">
 
@@ -23,10 +23,7 @@
         </div>
       </div>
       <footer>
-
-        <%= link_to "Accept Request", accept_friend_request_path(user.id, current_user.id), method: :put %>
-
-        <a href="#"><button class="button  is-link is-fullwidth">Add as Friend</button></a>
+        <%= link_to "Accept Request", accept_friend_request_path(user.id, current_user.id), method: :put, class:"button  is-link is-fullwidth" %>
       </footer>
     </div>
     </div>

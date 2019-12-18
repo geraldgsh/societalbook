@@ -26,7 +26,7 @@
       <% if user_signed_in? %>
         <a class="navbar-item" href="<%=user_friend_requests_path%>">
           <p>Notifications</p>
-          &nbsp;<span class="tag is-danger is-rounded"> <%=current_user.pending_friends.count%></span>
+          &nbsp;<span class="tag is-danger is-rounded"> <%=current_user.friend_requests.count%></span>
         </a>
       <%end%>
 

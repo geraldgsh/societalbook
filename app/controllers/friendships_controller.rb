@@ -1,6 +1,8 @@
 class FriendshipsController < ApplicationController
   def create
-    @friendship = current_user.outcoming_requests.build(requested_user_id: params[:user_id])
+    friend_id = params[:requestee_user_id]
+    friend_user = User.find(friend_id)
+    @friendship = current_user.friendships.build(friend_id: params[:requestee_user_id], status: false)
     if @friendship.save
       redirect_to users_friends_path(current_user), notice: 'Friend request created'
     else
@@ -9,12 +11,10 @@ class FriendshipsController < ApplicationController
   end
 
   def accept
-    if params[:requesting_user_id]
-      u2_id = params[:requesting_user_id]
-      u2 =  User.find(u2_id)
-      current_user_id = current_user.id
-      u1 = User.find(current_user_id)
-      u2.confirm_friend(u1)
+    if params[:requester_user_id]
+      requestee =  User.find(params[:requestee_user_id])
+      requester = User.find(current_user.id)
+      requestee.confirm_friend(requester)
       redirect_to user_friend_requests_path, notice: 'Success'
     else
       redirect_to user_friend_requests_path, alert: 'Something went wrong'
