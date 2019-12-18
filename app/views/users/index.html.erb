@@ -1,7 +1,8 @@
 <div class="columns is-multiline is-mobile">
   <% @users.each do |user| %>
-
-   <div class="row column is-one-third">
+  <% if user == current_user %>
+  <% else %>
+  <div class="row column is-one-third">
     <div class="card has-background-light">
 
       <div class="card-content">
@@ -23,10 +24,11 @@
           <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
         </div>
       </div>
-      <footer>
-        <%= link_to "Add friend", friend_request_path(user.id), method: :post, class:"button  is-link is-fullwidth" %>
+      <footer>      
+        <%= link_to "Add friend", friend_request_path(user.id), method: :post, class:"button  is-link is-fullwidth" %>      
       </footer>
     </div>
     </div>
+    <% end %>
     <% end %>
 </div>
