@@ -12,9 +12,11 @@ class MicropostsController < ApplicationController
     @likes = Like.all
   end
 
-  def show; end
+  def show
+  end
 
-  def edit; end
+  def edit
+  end
 
   def update
     @post.update(content: params[:post][:content])
