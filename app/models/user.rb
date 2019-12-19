@@ -33,16 +33,7 @@ class User < ApplicationRecord
     friendship.status = true
     friendship.save
   end
-
-  def my_a(requester_user_id, requestee_user_id)
-    friendship = Friendship.find_by(user_id: requester_user_id, friend_id: requestee_user_id)
-    if friendship
-      true
-    else
-      false
-    end
-  end
-
+  
   def friend?(user)
     friends.include?(user)
   end
