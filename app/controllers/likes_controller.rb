@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 class LikesController < ApplicationController
   before_action :find_post
   before_action :find_like, only: [:destroy]
-  
+
   def create
     if already_liked?
       flash[:notice] = "You can't like more than once"
@@ -12,8 +14,8 @@ class LikesController < ApplicationController
   end
 
   def destroy
-    if !(already_liked?)
-      flash[:notice] = "Cannot unlike"
+    if !already_liked?
+      flash[:notice] = 'Cannot unlike'
     else
       @like.destroy
     end

@@ -1,9 +1,9 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 class FriendshipsController < ApplicationController
   def create
-    friend_id = params[:requestee_user_id]
-    friend_user = User.find(friend_id)
     @friendship = current_user.friendships.build(friend_id: params[:requestee_user_id], status: false)
     if @friendship.save
       redirect_to users_friends_path(current_user), notice: 'Friend request created'
@@ -14,7 +14,7 @@ class FriendshipsController < ApplicationController
 
   def accept
     if params[:requester_user_id]
-      requestee =  User.find(params[:requestee_user_id])
+      requestee = User.find(params[:requestee_user_id])
       requester = User.find(current_user.id)
       requestee.confirm_friend(requester)
       redirect_to user_friend_requests_path, notice: 'Success'

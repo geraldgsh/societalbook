@@ -1,7 +1,7 @@
-class UsersController < ApplicationController
-  def show
+# frozen_string_literal: true
 
-  end
+class UsersController < ApplicationController
+  def show; end
 
   def index
     @users = User.all
@@ -19,8 +19,7 @@ class UsersController < ApplicationController
   #   # redirect_to users_path
   # end
 
-  def edit
-  end
+  def edit; end
 
   def friends
     @user = User.find(params[:user_id])
