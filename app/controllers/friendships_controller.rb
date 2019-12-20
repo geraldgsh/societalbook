@@ -2,12 +2,22 @@
 
 class FriendshipsController < ApplicationController
   def create
-    @friendship = current_user.friendships.build(friend_id: params[:requestee_user_id], status: false)
-    if @friendship.save
+    # @friendship = current_user.friendships.build(friend_id: params[:requestee_user_id], status: false)
+    # if @friendship.save
+    #   redirect_to users_friends_path(current_user), notice: 'Friend request sent'
+    # else
+    #   redirect_to users_friends_path(current_user), alert: 'Something went wrong'
+    # end
+    if params.include?(:friend_id) #individual e.g. "Add friend" link
+      @new_friendships = Friendship.create_reciprocal_for_ids(current_user_id, params[:friend_id])
       redirect_to users_friends_path(current_user), notice: 'Friend request sent'
     else
+      params[:user][:friend_ids].each do |f_id|
+      @new_friendships = Friendship.create_reciprocal_for_ids(current_user_id, f_id)
       redirect_to users_friends_path(current_user), alert: 'Something went wrong'
+      end
     end
+    redirect_to users_path
   end
 
   def accept
@@ -24,14 +34,18 @@ class FriendshipsController < ApplicationController
     end
   end
 
+  # def delete
+  #   @friendship = Friendship.find_by(user_id: params[:requester_user_id],
+  #                                    friend_id: params[:requestee_user_id])
+  #   if @friendship
+  #     @friendship.destroy
+  #     redirect_to user_friend_requests_path, notice: 'Friend removed'
+  #   else
+  #     redirect_to root_path, alert: 'You are not allowed to do this'
+  #   end
+  # end
   def delete
-    @friendship = Friendship.find_by(user_id: params[:requester_user_id],
-                                     friend_id: params[:requestee_user_id])
-    if @friendship
-      @friendship.destroy
-      redirect_to user_friend_requests_path, notice: 'Friend removed'
-    else
-      redirect_to root_path, alert: 'You are not allowed to do this'
-    end
+    Friendship.destroy_reciprocal_for_ids(current_user_id, params[:friend_id])
+    redirect_to(request.referer)
   end
 end
