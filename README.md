@@ -1209,46 +1209,43 @@ $ rails generate controller comments
 ```ruby
 # app/controllers/comments_controller.rb
 
+# frozen_string_literal: true
+
 class CommentsController < ApplicationController
   before_action :set_post, only: %i[edit update destroy]
   before_action :authenticate_user!
 
   def create
-    #current_user
-    #current micropost
-    #create comment for that
-    #save it
     @post = Micropost.find(params[:comment][:micropost_id])
     @comments = @post.comments
     @comment = @post.comments.build(comment_params)
     if @comment.save
       redirect_back(fallback_location: microposts_path)
     else
-      flash[:alert] = "Check the comment form"
-			redirect_to root_path
+      flash[:alert] = 'Check the comment form'
+      redirect_to root_path
     end
   end
 
   def destroy
+    @comment.destroy
+    redirect_to microposts_path
   end
 
-  def edit
-  end
+  def edit; end
 
-  def update
-  end
+  def update; end
 
   private
-    def comment_params
-      params.require(:comment).permit(:user_id, :micropost_id, :replay)
-    end
 
-    def set_post
-      @comment = Comment.find(params[:id])
-    end
+  def comment_params
+    params.require(:comment).permit(:user_id, :micropost_id, :replay)
+  end
 
+  def set_post
+    @comment = Comment.find(params[:id])
+  end
 end
-
 ```
 
 ** Run rails db:migrate command
@@ -1611,7 +1608,7 @@ end
             Option 3
           </a>
           <hr class="navbar-divider">
-          <a class="navbar-item">
+          <a•••• class="navbar-item">
             Need help?
           </a>
         </div>
@@ -1721,7 +1718,7 @@ RSpec.describe Like, type: :model do
   it 'should have micropost_id' do
    @like = @user.likes.build
    @like.valid?
-   expect(@like.errors[:micropost]).to include('must exist')
+   expect(@l••••ike.errors[:micropost]).to include('must exist')
 
    @like = @user.likes.build(micropost_id: @post.id)
    expect(@like.valid?).to eql(true)
@@ -1746,3 +1743,365 @@ RSpec.describe Like, type: :model do
 end
 ```
 
+# Milestone 5: Friendships V1
+
+Create a model with associations and all requested features for friendships. Hint with spoiler alert: If you are stuck, read this article https://smartfunnycool.com/friendships-in-activerecord/.
+
+IMPORTANT NOTE: In the next milestone, you will make friendships associations more efficient. In this one, let’s prepare the working version of the feature.
+
+Remember about unit and integrations tests!
+
+1. Generate & setup friendship model & DB
+
+```sh
+$ rails g model friendship user:references friend:references status:boolean  
+      invoke  active_record
+      create    db/migrate/20191212212954_create_friendships.rb
+      create    app/models/friendship.rb
+      invoke    test_unit
+      create      test/models/friendship_test.rb
+      create      test/fixtures/friendships.yml
+```
+
+```ruby
+# db/migrate/timestamp_create_friendships.rb
+
+class CreateFriendships < ActiveRecord::Migration[6.0]
+  def change
+    create_table :friendships do |t|
+      t.references :user, index: true, foreign_key: true
+      t.references :friend, index: true
+      t.boolean :status
+
+      t.timestamps null: false
+    end
+    add_foreign_key :friendships, :users, column: :friend_id
+  end
+end
+```
+
+```ruby
+# app/models/friendship.rb
+
+class Friendship < ApplicationRecord
+  belongs_to :user
+  belongs_to :friend, :class_name => "User"
+end
+```
+
+```sh
+$ rails db:migrate
+
+== 20191212201303 CreateFriendships: migrating ================================
+-- create_table(:friendships)
+   -> 0.6539s
+-- add_foreign_key(:friendships, :users, {:column=>:friend_id})
+   -> 0.0032s
+== 20191212201303 CreateFriendships: migrated (0.6584s) =======================
+```
+
+2. Setup friendship in user model & DB
+
+```ruby
+# app/models/user.rb
+
+class User < ApplicationRecord
+.
+.
+  has_many :friendships
+  has_many :inverse_friendships, :class_name => "Friendship", :foreign_key => "friend_id"
+.
+.
+  def friends
+    friends_array = friendships.map{|friendship| friendship.friend if friendship.status}
+    friends_array += inverse_friendships.map{|friendship| friendship.user if friendship.status}
+    friends_array.compact
+  end
+
+  # Users who have yet to confirme friend requests
+  def pending_friends
+    friendships.map{|friendship| friendship.friend if !friendship.status}.compact
+  end
+
+  # Users who have requested to be friends
+  def friend_requests
+    inverse_friendships.map{|friendship| friendship.user if !friendship.status}.compact
+  end
+
+  def confirm_friend(user)
+    friendship = inverse_friendships.find{|friendship| friendship.user == user}
+    friendship.status = true
+    friendship.save
+  end
+
+  def friend?(user)
+    friends.include?(user)
+  end
+end
+```
+
+3. Generate and setup friendships controller
+```sh
+rails generate controller friendships
+      create  app/controllers/friendships_controller.rb
+      invoke  erb
+      create    app/views/friendships
+      invoke  rspec
+      create    spec/controllers/friendships_controller_spec.rb
+      invoke  helper
+      create    app/helpers/friendships_helper.rb
+      invoke    rspec
+      create      spec/helpers/friendships_helper_spec.rb
+      invoke  assets
+      invoke    scss
+      create      app/assets/stylesheets/friendships.scss
+```
+
+```ruby
+# app/controller/friendships_controller.rb
+````
+
+4. Create friendship between users via rails console
+```sh
+2.6.5 :002 > u1 = User.find(1)
+  User Load (1.5ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 1], ["LIMIT", 1]]
+ => #<User id: 1, email: "batman@email.com", created_at: "2019-12-11 22:40:48", updated_at: "2019-12-11 22:40:48", name: "batman">
+2.6.5 :003 > u2 = User.find(2)
+  User Load (1.6ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 2], ["LIMIT", 1]]
+ => #<User id: 2, email: "hackernoon@email.com", created_at: "2019-12-12 14:05:22", updated_at: "2019-12-12 14:05:22", name: "hacker noon">
+
+Friendship.all
+  Friendship Load (2.9ms)  SELECT "friendships".* FROM "friendships" LIMIT $1  [["LIMIT", 11]]
+ => #<ActiveRecord::Relation []>
+
+2.6.5 :068 > f = Friendship.create(user_id: u2.id, friend_id: u1.id, status: false)
+   (1.9ms)  BEGIN
+  User Load (1.8ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 2], ["LIMIT", 1]]
+  User Load (1.0ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 1], ["LIMIT", 1]]
+  Friendship Create (1.4ms)  INSERT INTO "friendships" ("user_id", "friend_id", "status", "created_at", "updated_at") VALUES ($1, $2, $3, $4, $5) RETURNING "id"  [["user_id", 2], ["friend_id", 1], ["status", false], ["created_at", "2019-12-12 22:08:53.549844"], ["updated_at", "2019-12-12 22:08:53.549844"]]
+   (125.8ms)  COMMIT
+ => #<Friendship id: 3, user_id: 2, friend_id: 1, status: false, created_at: "2019-12-12 22:08:53", updated_at: "2019-12-12 22:08:53">
+
+2.6.5 :009 > f
+ => #<Friendship id: 1, user_id: 1, friend_id: 2, status: false, created_at: "2019-12-12 21:45:26", updated_at: "2019-12-12 21:45:26">
+
+2.6.5 :014 > u2.friend?(u1)
+  Friendship Load (1.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."user_id" = $1  [["user_id", 2]]
+  Friendship Load (3.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."friend_id" = $1  [["friend_id", 2]]
+ => true
+
+2.6.5 :015 > u1.friend?(u2)
+  Friendship Load (1.6ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."user_id" = $1  [["user_id", 1]]
+  Friendship Load (1.3ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."friend_id" = $1  [["friend_id", 1]]
+ => false
+
+# requestee and requestor
+
+2.6.5 :017 > f.friend
+ => #<User id: 2, email: "hackernoon@email.com", created_at: "2019-12-12 14:05:22", updated_at: "2019-12-12 14:05:22", name: "hacker noon">
+2.6.5 :018 > f.user
+ => #<User id: 1, email: "batman@email.com", created_at: "2019-12-11 22:40:48", updated_at: "2019-12-11 22:40:48", name: "batman">
+
+# Check first user's (user) pending friendship request
+
+2.6.5 :020 > u1.pending_friends
+  User Load (1.5ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 2], ["LIMIT", 1]]
+ => [#<User id: 2, email: "hackernoon@email.com", created_at: "2019-12-12 14:05:22", updated_at: "2019-12-12 14:05:22", name: "hacker noon">]
+
+
+# Check 2nd user's (friend) in coming friend reques
+
+2.6.5 :022 > u2.friend_requests
+  User Load (2.4ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 1], ["LIMIT", 1]]
+ => [#<User id: 1, email: "batman@email.com", created_at: "2019-12-11 22:40:48", updated_at: "2019-12-11 22:40:48", name: "batman">]
+
+# 2nd user (friend) confirm friendship with 1st user (user)
+
+u2.confirm_friend(u1)
+   (1.6ms)  BEGIN
+  User Load (1.4ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 2], ["LIMIT", 1]]
+  Friendship Update (2.8ms)  UPDATE "friendships" SET "status" = $1, "updated_at" = $2 WHERE "friendships"."id" = $3  [["status", true], ["updated_at", "2019-12-12 21:54:51.970268"], ["id", 1]]
+   (40.3ms)  COMMIT
+ => true
+
+# Check friend's name
+
+2.6.5 :025 > u1.friends[0].name
+  Friendship Load (1.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."user_id" = $1  [["user_id", 1]]
+  User Load (3.1ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 2], ["LIMIT", 1]]
+  Friendship Load (1.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."friend_id" = $1  [["friend_id", 1]]
+ => "robin"
+
+```
+
+5. Micropost Image Upload
+
+To handle an uploaded image and associate it with the Micropost model, we’ll use the CarrierWave image uploader. To get started, we need to include the carrierwave and mini_magick gems in the Gemfile.
+
+```sh
+# gemfile
+
+source 'https://rubygems.org'
+.
+.
+gem 'carrierwave', '~> 2.0', '>= 2.0.2'
+gem 'mini_magick', '~> 4.9', '>= 4.9.5'
+.
+.
+end
+```
+```sh
+$ bundle install
+```
+
+CarrierWave adds a Rails generator for creating an image uploader, which we’ll use to make an uploader for an image called picture.
+
+```sh
+$ rails generate uploader Picture
+      create  app/uploaders/picture_uploader.rb
+```
+
+Images uploaded with CarrierWave should be associated with a corresponding attribute in an Active Record model, which simply contains the name of the image file in a string field.
+
+To add the required picture attribute to the Micropost model, we generate a migration and migrate the development database:
+
+```sh
+$ rails generate migration add_picture_to_microposts picture:string
+      invoke  active_record
+      create    db/migrate/20191214211030_add_picture_to_microposts.rb
+
+$ rails db:migrate
+== 20191214211030 AddPictureToMicroposts: migrating ===========================
+-- add_column(:microposts, :picture, :string)
+   -> 0.0832s
+== 20191214211030 AddPictureToMicroposts: migrated (0.0839s) ==================
+```
+
+The way to tell CarrierWave to associate the image with a model is to use the mount_uploader method, which takes as arguments a symbol representing the attribute and the class name of the generated uploader:
+
+```sh
+mount_uploader :picture, PictureUploader
+```
+
+Here PictureUploader is defined in the file picture_uploader.rb, which we’ll start editing in Section 13.4.2, but for now the generated default is fine. Adding the uploader to the Micropost model gives the code shown below;
+
+```ruby
+class Micropost < ApplicationRecord
+.
+.
+  mount_uploader :picture, PictureUploader
+.
+.
+end
+
+```
+
+To include the uploader on the form friendshippage
+
+```erb
+# app/views/microposts/_form.html.erb
+
+<%= form_with(model: @post, local: true) do |form| %>
+.
+.
+  <span class="picture">
+    <%= form.file_field :picture %>
+  </span>
+<% end %>
+```
+
+Finally, we need to add picture to the list of attributes permitted to be modified through the web. This involves editing the micropost_params method, as shown below;
+
+```ruby
+
+# Image validation
+
+The first image validation, which restricts uploads to valid image types, appears in the CarrierWave uploader itself. The resulting code (which appears as a commented-out suggestion in the generated uploader) verifies that the image filename ends with a valid image extension (PNG, GIF, and both variants of JPEG), as shown below;
+
+```ruby
+# app/uploaders/picture_uploader.rb
+
+class PictureUploader < CarrierWave::Uploader::Base
+  storage :file
+
+  # Override the directory where uploaded files will be stored.
+  # This is a sensible default for uploaders that are meant to be mounted:
+  def store_dir
+    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+  end
+
+  # Add a white list of extensions which are allowed to be uploaded.
+  def extension_whitelist
+    %w(jpg jpeg gif png)
+  end
+end
+```
+
+The second validation, which controls the size of the image, appears in the Micropost model itself. In contrast to previous model validations, file size validation doesn’t correspond to a built-in Rails validator. As a result, validating images requires defining a custom validation, which we’ll call picture_size and define as shown below
+
+```ruby
+# app/models/micropost.rb
+class Micropost < ApplicationRecord
+.
+.
+  validate  :picture_size
+
+  private
+
+  # Validates the size of an uploaded picture.
+  def picture_size
+    if picture.size > 5.megabytes
+      errors.add(:picture, "should be less than 5MB")
+    end
+  end
+end
+```
+
+This custom validation arranges to call the method corresponding to the given symbol (:picture_size). In picture_size itself, we add a custom error message to the errors collection.
+
+Add two client-side checks on the uploaded image. We’ll first mirror the format validation by using the accept parameter in the file_field input tag:
+
+```sh
+<%= form.file_field :picture, accept: 'image/jpeg,image/gif,image/png' %>
+```
+
+Include a little JavaScript (or, more specifically, jQuery) to issue an alert if a user tries to upload an image that’s too big (which prevents accidental time-consuming uploads and lightens the load on the server).
+
+```sh
+# app/views/shared/_micropost_form.html.erb
+.
+.
+  <span class="picture">
+    <%= f.file_field :picture, accept: 'image/jpeg,image/gif,image/png' %>
+  </span>
+<% end %>
+.
+.
+<script type="text/javascript">
+  $('#micropost_picture').bind('change', function() {
+    var size_in_megabytes = this.files[0].size/1024/1024;
+    if (size_in_megabytes > 5) {
+      alert('Maximum file size is 5MB. Please choose a smaller file.');
+    }
+  });
+</script>
+```
+
+# Image resizing
+
+It’s also a good idea to resize the images before displaying them.
+
+```sh
+$ sudo apt install php php-common gcc
+$ sudo apt install imagemagick
+```
+
+Include CarrierWave’s MiniMagick interface for ImageMagick, together with a resizing command.
+
+```sh
+class PictureUploader < CarrierWave::Uploader::Base
+  include CarrierWave::MiniMagick
+  process resize_to_limit: [400, 400]
+.
+.
+```

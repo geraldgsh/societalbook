@@ -11,6 +11,8 @@
         <strong><%= p.user.name %></strong>
         <br>
         <%= p.content %>
+        <br>
+        <%= image_tag p.picture.url if p.picture? %>
       </p>
     </div>
     <nav class="level is-mobile">

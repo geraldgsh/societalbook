@@ -12,9 +12,11 @@ class MicropostsController < ApplicationController
     @likes = Like.all
   end
 
-  def show; end
+  def show
+  end
 
-  def edit; end
+  def edit
+  end
 
   def update
     @post.update(content: params[:post][:content])
@@ -27,8 +29,14 @@ class MicropostsController < ApplicationController
   end
 
   def create
-    @post = current_user.microposts.create(content: params[:micropost][:content])
-    redirect_to microposts_url
+    @micropost = current_user.microposts.build(micropost_params)
+    if @micropost.save
+      flash[:success] = 'Micropost created!'
+      redirect_to microposts_url
+    else
+      flash[:error] = 'Micropost created!'
+      render root_url
+    end
   end
 
   def destroy
@@ -38,5 +46,11 @@ class MicropostsController < ApplicationController
 
   def find_post
     @post = Micropost.find(params[:id])
+  end
+
+  private
+
+  def micropost_params
+    params.require(:micropost).permit(:content, :picture)
   end
 end

@@ -1,0 +1,31 @@
+<div class="columns is-multiline is-mobile">
+  <% @friends.each  do |friend| %>
+   <div class="row column is-one-third">
+    <div class="card has-background-light">
+
+      <div class="card-content">
+        <div class="media">
+          <div class="media-left">
+            <%= gravatar_for friend %>
+          </div>
+          <div class="media-content">
+            <p class="title is-4"><%= friend.name %></p>
+            <p class="subtitle is-6"><%= friend.email %></p>
+          </div>
+        </div>
+
+        <div class="contfreshent">
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+          Phasellus nec iaculis mauris. <a>@bulmaio</a>.
+          <a href="#">#css</a> <a href="#">#responsive</a>
+          <br>
+          <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
+        </div>
+      </div>
+      <footer>
+         <%= link_to "Unfriend :(", delete_friend_request_path(friend.id, current_user.id), method: :delete, class:"button  is-danger is-link is-fullwidth" %>
+      </footer>
+    </div>
+    </div>
+    <% end%>
+</div>

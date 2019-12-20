@@ -38,6 +38,10 @@ gem 'omniauth-facebook', '~> 5.0'
 gem 'bulma-rails', '~> 0.8.0'
 gem 'font-awesome-rails', '~> 4.7', '>= 4.7.0.2'
 
+# Image handling
+gem 'carrierwave', '~> 2.0', '>= 2.0.2'
+gem 'mini_magick', '~> 4.9', '>= 4.9.5'
+
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
   gem 'byebug', platforms: %i[mri mingw x64_mingw]
