@@ -9,29 +9,36 @@ class FriendshipsController < ApplicationController
     #   redirect_to users_friends_path(current_user), alert: 'Something went wrong'
     # end
     if params.include?(:friend_id) #individual e.g. "Add friend" link
-      @new_friendships = Friendship.create_reciprocal_for_ids(current_user_id, params[:friend_id])
+      @new_friendships = Friendship.create_friendship(current_user.id, params[:friend_id])
       redirect_to users_friends_path(current_user), notice: 'Friend request sent'
     else
       params[:user][:friend_ids].each do |f_id|
-      @new_friendships = Friendship.create_reciprocal_for_ids(current_user_id, f_id)
+      @new_friendships = Friendship.create_friendship(current_use.id, f_id)
       redirect_to users_friends_path(current_user), alert: 'Something went wrong'
       end
     end
-    redirect_to users_path
+    # redirect_to users_path
   end
 
   def accept
+    # if params[:requestee_user_id]
+    #   requestee =  User.find(params[:requestee_user_id])
+    #   requester = User.find(current_user.id)
+    #   # requestee.confirm_friend(requester)
+    #   f = Friendship.find_by(user_id: requestee.id, friend_id: requester.id)
+    #   f.status = true
+    #   f.save
+    #   redirect_to user_friend_requests_path, notice: 'Friend confirmed'
+    # else
+    #   redirect_to user_friend_requests_path, alert: 'Something went wrong'
+    # end
     if params[:requestee_user_id]
-      requestee =  User.find(params[:requestee_user_id])
-      requester = User.find(current_user.id)
-      # requestee.confirm_friend(requester)
-      f = Friendship.find_by(user_id: requestee.id, friend_id: requester.id)
-      f.status = true
-      f.save
+      Friendship.confirm_friendship(params[:requestee_user_id], params[:requested_user_id])
       redirect_to user_friend_requests_path, notice: 'Friend confirmed'
     else
       redirect_to user_friend_requests_path, alert: 'Something went wrong'
     end
+      
   end
 
   # def delete
@@ -45,7 +52,11 @@ class FriendshipsController < ApplicationController
   #   end
   # end
   def delete
-    Friendship.destroy_reciprocal_for_ids(current_user_id, params[:friend_id])
-    redirect_to(request.referer)
-  end
+    if params[:requester_user_id]
+      Friendship.delete_friendship(params[:requester_user_id],params[:requestee_user_id])
+      redirect_to user_friend_requests_path, notice: 'Friend removed'
+    else
+      redirect_to root_path, alert: 'You are not allowed to do this'
+    end
+  end 
 end
