@@ -3,6 +3,15 @@
 class Friendship < ApplicationRecord
   belongs_to :user
   belongs_to :friend, :class_name => "User"
+  # validate :disallow_self_friendship
+  validates_uniqueness_of :user, scope: [:user_id, :friend_id]
+  validate :disallow_self_friendship
+  
+  def disallow_self_friendship
+    if user_id == friend_id
+      errors.add(:friend_id, "Can't friend yourself")
+    end
+  end
 
   def self.create_friendship(user_id, friend_id)
     user_friendship = Friendship.create(user_id: user_id, friend_id: friend_id, status: false)
@@ -25,4 +34,5 @@ class Friendship < ApplicationRecord
     friendship1.destroy
     friendship2.destroy
   end
-end  
+
+end
