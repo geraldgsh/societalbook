@@ -126,4 +126,32 @@ RSpec.describe Friendship, type: :model do
       expect(cancel_friendship).to eql(@friend_request)
     end
   end
+
+  describe '#validate friendship' do
+    before :each do
+      @sender = User.create(name: 'test6', email: 'test6@test.com', password: '123456')
+      @receiver = User.create(name: 'test7', email: 'test7@test.com', password: '123456')
+      @friend_request = Friendship.create(user_id: @sender.id, friend_id: @receiver.id, status: true)
+    end
+
+    it 'stop user to friend ownself' do
+      request = Friendship.create(user_id: @sender.id, friend_id: @sender.id)
+      expect(request.valid?).to eql(false)
+    end
+
+    it 'stop user friend to friend ownself' do
+      request = Friendship.create(user_id: @receiver.id, friend_id: @receiver.id)
+      expect(request.valid?).to eql(false)
+    end
+
+    it 'stop duplicate friend request' do
+      request = Friendship.create(user_id: @sender.id, friend_id: @receiver.id)
+      expect(request.valid?).to eql(false)
+    end
+
+    it 'stop inverse duplicate friend request' do
+      request = Friendship.create(user_id: @receiver.id, friend_id: @sender.id)
+      expect(request.valid?).to eql(false)
+    end
+  end
 end
