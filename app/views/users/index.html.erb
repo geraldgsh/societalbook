@@ -31,10 +31,6 @@
           <p>Pending Request!</p>
         </div>
           <%= link_to "Cancel request", delete_friend_request_path(current_user.id, user.id), method: :delete, class:"button  is-danger is-link is-fullwidth" %>
-        <% elsif current_user.friend?(user)%>
-          <div class="notification is-success">
-          <p>You are already friend of: <%= current_user.name%></p>
-        </div>
         <% else %>
           <%= link_to "Add friend", friend_request_path(user.id), method: :post, class:"button  is-link is-fullwidth" %>
         <% end %>

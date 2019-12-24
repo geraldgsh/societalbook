@@ -89,16 +89,16 @@ RSpec.describe Friendship, type: :model do
       expect(pending_request).to include()
     end
 
+    it 'returns friend for requestee' do
+      pending_request = @responder.friends
+      requestor = [@requestor]
+      expect(pending_request).to eql(requestor)
+    end
+
     it 'returns friend of requester' do
       pending_request = @requestor.friends
       responder = [@responder]
       expect(pending_request).to eql(responder)
-    end
-
-    it 'returns friend for requestee' do
-      pending_request = @responder.friends
-      requestor = [@requestor]
-      expect(pending_request).to eql([])
     end
 
     it 'returns no pending friend request for requestee' do
@@ -113,7 +113,7 @@ RSpec.describe Friendship, type: :model do
 
     it 'returns confirmed friend in responder friend list' do
       pending_request = @responder.friend?(@requestor)
-      expect(pending_request).to eql(false)
+      expect(pending_request).to eql(true)
     end
 
     it 'returns confirmed friend in reqeuestor friend list' do
@@ -124,26 +124,6 @@ RSpec.describe Friendship, type: :model do
     it 'returns successful friend removal' do
       cancel_friendship = Friendship.find_by(user_id: @requestor.id, friend_id: @responder.id).destroy
       expect(cancel_friendship).to eql(@friend_request)
-    end
-  end
-
-  describe '#Mutual friendship' do
-    before :each do
-      @requestor = User.create(name: 'test4', email: 'test4@test.com', password: '123456')
-      @responder = User.create(name: 'test5', email: 'test5@test.com', password: '123456')
-      @friend_request = Friendship.create_friendship(@requestor.id, @responder.id)
-    end
-    it 'creates mutual friend request' do
-      request = Friendship.create_friendship(@requestor.id, @responder.id)
-      expect(request.length).to eql(2)
-    end
-    it 'creates mutual friend confirmation' do
-      request = Friendship.confirm_friendship(@requestor.id, @responder.id)
-      expect(request).to eql(true)
-    end
-    it 'creates mutual friend confirmation' do
-      request = Friendship.delete_friendship(@requestor.id, @responder.id)
-      expect(request).to eql(@friend_request[1])
     end
   end
 end
