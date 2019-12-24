@@ -5,7 +5,7 @@ class Friendship < ApplicationRecord
   belongs_to :friend, :class_name => "User"
   validates_uniqueness_of :user, scope: [:user_id, :friend_id]
   validate :disallow_self_friendship
-  validate :duplicate_check
+  validate :duplicate_check, if: :new_record?
   
   def disallow_self_friendship
     if user_id == friend_id
@@ -14,7 +14,7 @@ class Friendship < ApplicationRecord
   end
 
   def duplicate_check
-    if Friendship.where(user_id: user_id.id, friend_id: friend_id.id).empty? && Friendship.where(user_id: user_id.id, friend_id: friend_id.id).empty?
+    if !Friendship.where(user_id: user, friend_id: friend).empty? or !Friendship.where(user_id: friend, friend_id: user).empty?
       errors.add(:base, "Friendship exist")
     end
   end
