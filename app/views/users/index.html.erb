@@ -1,6 +1,7 @@
 <div class="columns is-multiline is-mobile">
   <% @users.each do |user| %>
   <% if user == current_user %>
+  <% elsif current_user.friend?(user) %>
   <% else %>
   <div class="row column is-one-third">
     <div class="card has-background-light">
@@ -25,7 +26,6 @@
         </div>
       </div>
       <footer>
-
         <% if current_user.pending_friends.any? {|f| f == user }%>
         <div class="notification is-warning">
           <p>Pending Request!</p>
