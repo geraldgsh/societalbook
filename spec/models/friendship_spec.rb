@@ -92,7 +92,7 @@ RSpec.describe Friendship, type: :model do
     it 'returns friend for requestee' do
       pending_request = @responder.friends
       requestor = [@requestor]
-      expect(pending_request).to eql(requestor)
+      expect(pending_request).to eql([])
     end
 
     it 'returns friend of requester' do
@@ -113,7 +113,7 @@ RSpec.describe Friendship, type: :model do
 
     it 'returns confirmed friend in responder friend list' do
       pending_request = @responder.friend?(@requestor)
-      expect(pending_request).to eql(true)
+      expect(pending_request).to eql(false)
     end
 
     it 'returns confirmed friend in reqeuestor friend list' do
