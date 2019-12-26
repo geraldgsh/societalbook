@@ -92,7 +92,7 @@ RSpec.describe Friendship, type: :model do
     it 'returns friend for requestee' do
       pending_request = @responder.friends
       requestor = [@requestor]
-      expect(pending_request).to eql(requestor)
+      expect(pending_request).to eql([])
     end
 
     it 'returns friend of requester' do
@@ -113,7 +113,7 @@ RSpec.describe Friendship, type: :model do
 
     it 'returns confirmed friend in responder friend list' do
       pending_request = @responder.friend?(@requestor)
-      expect(pending_request).to eql(true)
+      expect(pending_request).to eql(false)
     end
 
     it 'returns confirmed friend in reqeuestor friend list' do
@@ -124,6 +124,34 @@ RSpec.describe Friendship, type: :model do
     it 'returns successful friend removal' do
       cancel_friendship = Friendship.find_by(user_id: @requestor.id, friend_id: @responder.id).destroy
       expect(cancel_friendship).to eql(@friend_request)
+    end
+  end
+
+  describe '#validate friendship' do
+    before :each do
+      @sender = User.create(name: 'test6', email: 'test6@test.com', password: '123456')
+      @receiver = User.create(name: 'test7', email: 'test7@test.com', password: '123456')
+      @friend_request = Friendship.create(user_id: @sender.id, friend_id: @receiver.id, status: true)
+    end
+
+    it 'stop user to friend ownself' do
+      request = Friendship.create(user_id: @sender.id, friend_id: @sender.id)
+      expect(request.valid?).to eql(false)
+    end
+
+    it 'stop user friend to friend ownself' do
+      request = Friendship.create(user_id: @receiver.id, friend_id: @receiver.id)
+      expect(request.valid?).to eql(false)
+    end
+
+    it 'stop duplicate friend request' do
+      request = Friendship.create(user_id: @sender.id, friend_id: @receiver.id)
+      expect(request.valid?).to eql(false)
+    end
+
+    it 'stop inverse duplicate friend request' do
+      request = Friendship.create(user_id: @receiver.id, friend_id: @sender.id)
+      expect(request.valid?).to eql(false)
     end
   end
 end
