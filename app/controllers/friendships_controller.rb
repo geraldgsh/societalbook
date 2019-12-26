@@ -14,7 +14,6 @@ class FriendshipsController < ApplicationController
     if params[:requestee_user_id]
       requestee =  User.find(params[:requestee_user_id])
       requester = User.find(current_user.id)
-      # requestee.confirm_friend(requester)
       f = Friendship.find_by(user_id: requestee.id, friend_id: requester.id)
       f.status = true
       f.save
