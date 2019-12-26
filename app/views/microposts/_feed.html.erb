@@ -1,4 +1,5 @@
-<% @posts.each do |p| %>
+<% if @feeds %>
+<% @feeds.each do |p| %>
 <article class="media">
   <figure class="media-left">
     <p class="image is-64x64">
@@ -30,7 +31,7 @@
             <%= link_to fa_icon("thumbs-down"), micropost_like_path(p.id, pre_like), method: :delete %>
           <% else %>
             <%= link_to fa_icon("thumbs-up"), micropost_likes_path(micropost_id: p.id), method: :post %>
-          <% end %>              
+          <% end %>
           </span>
           <p><%= p.likes.count %> <%= (p.likes.count) == 1 ? 'Like' : 'Likes'%></p>
         </a>
@@ -45,7 +46,7 @@
     </nav>
 
     <% @comments.each do |c| %>
-    <% if p.id == c.micropost_id %>      
+    <% if p.id == c.micropost_id %>
       <article class="media">
         <figure class="media-left">
           <p class="image is-64x64">
@@ -98,3 +99,6 @@
   </div>
 </article>
 <%end%>
+<% else %>
+
+<% end %>
