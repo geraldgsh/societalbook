@@ -1,19 +1,19 @@
 ---
 development:
   cloud_name: dvjiperdo
-  api_key: 'CL_ID'
-  api_secret: CL_key
+  api_key: ENV['CL_ID']
+  api_secret: ENV[CL_KEY]
   enhance_image_tag: true
   static_file_support: false
 production:
   cloud_name: dvjiperdo
-  api_key: 'CL_ID'
-  api_secret: CL_key
+  api_key: ENV['CL_ID']
+  api_secret: ENV[CL_KEY]
   enhance_image_tag: true
   static_file_support: true
 test:
   cloud_name: dvjiperdo
-  api_key: 'CL_ID'
-  api_secret: CL_key
+  api_key: ENV['CL_ID']
+  api_secret: ENV[CL_KEY]
   enhance_image_tag: true
   static_file_support: false
