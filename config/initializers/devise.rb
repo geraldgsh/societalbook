@@ -298,5 +298,5 @@ Devise.setup do |config|
   # config.sign_in_after_change_password = true
 
   # Facebook credentials
-    config.omniauth :facebook, ENV['APP_ID'], ENV['SECRET'] , callback_url: "http://societalbook.herokuapp.com/auth/facebook/callback"
+    config.omniauth :facebook, '491110104868427', '7bda32e9e31093e362ed5540a5e0ef75', callback_url: "http://societalbook.herokuapp.com/auth/facebook/callback"
 end
