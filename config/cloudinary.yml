@@ -1,0 +1,19 @@
+---
+development:
+  cloud_name: dvjiperdo
+  api_key: '785724518229211'
+  api_secret: pO0XE3134QAzP1FXOb-DM4wQHac
+  enhance_image_tag: true
+  static_file_support: false
+production:
+  cloud_name: dvjiperdo
+  api_key: '785724518229211'
+  api_secret: pO0XE3134QAzP1FXOb-DM4wQHac
+  enhance_image_tag: true
+  static_file_support: true
+test:
+  cloud_name: dvjiperdo
+  api_key: '785724518229211'
+  api_secret: pO0XE3134QAzP1FXOb-DM4wQHac
+  enhance_image_tag: true
+  static_file_support: false

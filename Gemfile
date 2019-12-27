@@ -41,6 +41,7 @@ gem 'font-awesome-rails', '~> 4.7', '>= 4.7.0.2'
 # Image handling
 gem 'carrierwave', '~> 2.0', '>= 2.0.2'
 gem 'mini_magick', '~> 4.9', '>= 4.9.5'
+gem 'cloudinary'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
