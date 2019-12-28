@@ -2105,3 +2105,168 @@ class PictureUploader < CarrierWave::Uploader::Base
 .
 .
 ```
+
+# Milestone #6: Friendship Version 2
+
+Read those articles: - https://stackoverflow.com/questions/4219979/sql-best-practice-for-a-friendship-table - https://explainextended.com/2009/03/07/selecting-friends/ Try to implement friendships with 2 rows for mutual friendship. Remember about unit and integrations tests!
+
+# 1. Modify friendship controller to add 2nd DB row when mutual friendship confirmed
+
+```ruby
+# app/controllers/friendship.rb
+
+class FriendshipsController < ApplicationController
+.
+.
+  def accept
+    if params[:requestee_user_id]
+.
+.
+      Friendship.create(user_id: requester.id, friend_id: requestee.id, status: true)
+.
+.
+```
+
+Confirm that second row have been created after confirmation by using rails console.
+
+```sh
+2.6.5 :004 > Friendship.all
+  Friendship Load (2.3ms)  SELECT "friendships".* FROM "friendships" LIMIT $1  [["LIMIT", 11]]
+ => #<ActiveRecord::Relation [#<Friendship id: 1, user_id: 2, friend_id: 3, status: true, created_at: "2019-12-28 14:54:39", updated_at: "2019-12-28 14:55:03">, #<Friendship id: 2, user_id: 3, friend_id: 2, status: true, created_at: "2019-12-28 14:55:03", updated_at: "2019-12-28 14:55:03">]>
+```
+
+Take note of user and friend ID that are inverse between first and second row.
+
+Again using rails console, run the following commands to display users have two way friendship.
+
+```sh
+2.6.5 :002 > u1 = User.find(1)
+  User Load (1.2ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 1], ["LIMIT", 1]]
+ => #<User id: 1, email: "hysteria81@hotmail.com", created_at: "2019-12-27 13:22:20", updated_at: "2019-12-27 13:22:20", name: "Gerald Goh", provider: "facebook", uid: "10157626347591145", image: "http://graph.facebook.com/v2.10/10157626347591145/...">
+2.6.5 :003 > u2 = User.find(2)
+  User Load (2.6ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 2], ["LIMIT", 1]]
+ => #<User id: 2, email: "batman@email.com", created_at: "2019-12-27 14:20:37", updated_at: "2019-12-27 14:20:37", name: "batman", provider: nil, uid: nil, image: nil>
+
+2.6.5 :015 > u2.friends
+  Friendship Load (1.2ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."user_id" = $1  [["user_id", 2]]
+  User Load (1.8ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 3], ["LIMIT", 1]]
+ => [#<User id: 3, email: "robin@email.com", created_at: "2019-12-28 14:54:24", updated_at: "2019-12-28 14:54:24", name: "robin", provider: nil, uid: nil, image: nil>]
+2.6.5 :016 > u3.friends
+  Friendship Load (2.1ms)  SELECT "friendships".* FROM "friendships" WHERE "friendships"."user_id" = $1  [["user_id", 3]]
+  User Load (1.3ms)  SELECT "users".* FROM "users" WHERE "users"."id" = $1 LIMIT $2  [["id", 2], ["LIMIT", 1]]
+ => [#<User id: 2, email: "batman@email.com", created_at: "2019-12-27 14:20:37", updated_at: "2019-12-27 14:20:37", name: "batman", provider: nil, uid: nil, image: nil>]
+
+2.6.5 :021 > u2.friend?(u3)
+ => true
+2.6.5 :022 > u3.friend?(u2)
+ => true
+```
+
+** NOTE: Remember to "reload!" in rails console whenever friendship was created and after confirmation.
+
+# 2. Modify user.rb model for further friendship refinement.
+
+2.1 Make User's friends visible via user_id in friendships table
+
+```ruby
+# app/models/user.rb
+
+class User < ApplicationRecord
+.
+.
+  has_many :confirmed_friendships, -> { where status: true }, class_name: "Friendship"
+  has_many :friends, through: :confirmed_friendships
+.
+.
+```
+
+2.2  User's pending_friends defined as association with SQL query instead of processing objects in application memory. Hence directing resource usage to SQL instead (Since created database's purpose is to store and query data; it is always more efficient memory utilization).
+
+```ruby
+# app/models/user.rb
+
+class User < ApplicationRecord
+.
+.
+  has_many :pending_friendships, -> { where status: false }, class_name: "Friendship", foreign_key: "user_id"
+  has_many :pending_friends, through: :pending_friendships, source: :friend
+.
+.
+```
+
+2.3 User's friend_requests defined as association with SQL query instead of processing objects in application memory. Hence directing resource usage to SQL instead (Since created database's purpose is to store and query data; it is always more efficient memory utilization).
+
+```ruby
+# app/models/user.rb
+
+class User < ApplicationRecord
+.
+.
+  has_many :inverse_friendships, -> { where status: false }, class_name: 'Friendship', foreign_key: 'friend_id'
+  has_many :friend_requests, through: :inverse_friendships
+.
+.
+```
+
+2.4 Since each user should have a feed, we are led naturally to a feed method in the User model, which will initially just select all the microposts belonging to the current user. This code contains an SQL subselect, and internally the entire select for user. This subselect arranges for all the set logic to be pushed into the database, which is more efficient.
+
+```ruby
+# app/models/user.rb
+
+class User < ApplicationRecord
+  .
+  .
+  .
+  def feed
+    following_ids = "SELECT friend_id FROM friendships
+                     WHERE  user_id = :user_id"
+    Micropost.where("user_id IN (#{following_ids})
+                     OR user_id = :user_id", user_id: id)
+  end
+    .
+    .
+    .
+end
+```
+
+3. Friendship validations
+
+3.1 Method to avoid friendship oneself
+
+```ruby
+# app/models/friendship.rb
+
+class Friendship < ApplicationRecord
+.
+.
+  validate :disallow_self_friendship
+.
+.
+  def disallow_self_friendship
+    if user_id == friend_id
+      errors.add(:friend_id, "Can't friend yourself")
+    end
+  end
+.
+.
+```
+
+# 3.2 Method to stop duplicating frienships
+
+```ruby
+# app/models/friendship.rb
+
+class Friendship < ApplicationRecord
+.
+.
+  validate :duplicate_check
+.
+.
+  def duplicate_check
+    errors.add(:user_id, 'Already friends!') if Friendship.where(
+          user_id: friend_id, friend_id: user_id).exists? &&
+          Friendship.where(user_id: user_id, friend_id: friend_id).exists?
+  end
+.
+.
+```
