@@ -1,4 +1,5 @@
 # Microverse Project Title - Final Project [Collaborative Project]
+
 Ruby on Rails
 
 ### Introduction.
@@ -2270,3 +2271,21 @@ class Friendship < ApplicationRecord
 .
 .
 ```
+
+### Source
+
+https://www.theodinproject.com/courses/ruby-on-rails/lessons/final-project
+
+### Github Repo
+
+https://github.com/geraldgsh/societalbook
+
+### Live Page
+
+https://societalbook.herokuapp.com
+
+### Authors
+
+* [@Christian](https://github.com/jcromerohdz)
+
+* [@Gerald](https://github.com/geraldgsh)
