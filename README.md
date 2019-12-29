@@ -2251,7 +2251,7 @@ class Friendship < ApplicationRecord
 .
 ```
 
-# 3.2 Method to stop duplicating frienships
+3.2 Method to stop duplicating frienships
 
 ```ruby
 # app/models/friendship.rb

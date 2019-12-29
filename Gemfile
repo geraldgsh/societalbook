@@ -30,13 +30,14 @@ gem 'jbuilder', '~> 2.7'
 
 # Reduces boot times through caching; required in config/boot.rb
 gem 'bootsnap', '>= 1.4.2', require: false
-
+gem 'faker'
 gem 'devise', '~> 4.7', '>= 4.7.1'
 gem 'omniauth-facebook', '~> 5.0'
 
 # UI/UX Bulma css
 gem 'bulma-rails', '~> 0.8.0'
 gem 'font-awesome-rails', '~> 4.7', '>= 4.7.0.2'
+gem 'pagy'
 
 # Image handling
 gem 'carrierwave', '~> 2.0', '>= 2.0.2'

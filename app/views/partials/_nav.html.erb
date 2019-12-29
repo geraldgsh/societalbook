@@ -13,15 +13,12 @@
 
   <div id="navbarBasicExample" class="navbar-menu">
     <div class="navbar-start">
-
       <%= link_to 'Home', root_path, class: "navbar-item"%>
-
-      <%= link_to 'Micropost', microposts_path, class: "navbar-item"%>
       <% if user_signed_in? %>
+        <%= link_to 'Micropost', microposts_path, class: "navbar-item"%>
         <%= link_to 'Friends List', users_friends_path(current_user), class: "navbar-item"%>
-      <%end%>
-
-      <%= link_to 'Users',users_path, class: "navbar-item"%>
+        <%= link_to 'Users',users_path, class: "navbar-item"%>
+      <%end%> 
 
       <% if user_signed_in? %>
         <a class="navbar-item" href="<%=user_friend_requests_path%>">
@@ -34,17 +31,10 @@
         <a class="navbar-link">
           More
         </a>
-
         <div class="navbar-dropdown">
-          <a class="navbar-item">
-            Friends List
-          </a>
-          <a class="navbar-item">
-            Option 2
-          </a>
-          <a class="navbar-item">
-            Option 3
-          </a>
+          <li class="navbar-item">
+            <%= link_to "About",   about_path %>
+          </li>
           <hr class="navbar-divider">
           <a class="navbar-item">
             Need help?

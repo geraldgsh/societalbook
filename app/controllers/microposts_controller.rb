@@ -6,7 +6,7 @@ class MicropostsController < ApplicationController
 
   def index
     @posts = Micropost.all
-    @feeds = current_user.feed
+    @pagy, @feeds = pagy(current_user.feed, items: 5)
     @post = Micropost.new
     @comments = Comment.all
     @comment = Comment.new
