@@ -1,0 +1,35 @@
+<div class="columns is-multiline is-mobile">
+  <% @nofriends.each do |user| %>
+  <div class="row column is-one-third">
+    <div class="card has-background-light">
+
+      <div class="card-content">
+        <div class="media">
+          <div class="media-left">
+            <%= gravatar_for user %>
+          </div>
+          <div class="media-content">
+            <p class="title is-4"><%= user.name %></p>
+            <p class="subtitle is-6"><%= user.email %></p>
+          </div>
+        </div>
+
+        <div class="content">
+          Joined Societalbook <%= time_ago_in_words(user.created_at) %> ago
+        </div>
+      </div>
+      <footer>
+        <% if current_user.pending_friends.any? {|f| f == user }%>
+        <div class="notification is-warning">
+          <p>Pending Request!</p>
+        </div>
+          <%= link_to "Cancel request", delete_friend_request_path(current_user.id, user.id), method: :delete, class:"button  is-danger is-link is-fullwidth" %>
+        <% else %>
+          <%= link_to "Add friend", friend_request_path(user.id), method: :post, class:"button  is-link is-fullwidth" %>
+        <% end %>
+      </footer>
+    </div>
+    </div>
+    <% end %>
+</div>
+<%= pagy_bulma_nav(@pagy).html_safe %>

@@ -7,9 +7,37 @@
 
     <%= stylesheet_link_tag 'application', media: 'all', 'data-turbolinks-track': 'reload' %>
     <%= javascript_pack_tag 'application', 'data-turbolinks-track': 'reload' %>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/fontawesome.css" rel="stylesheet">
+    
   </head>
 
   <body>
-    <%= yield %>
+    <div class="container">
+      <%= render "partials/nav"%>
+        <% if notice %>
+          <p class="notification is-success">
+            <button class="delete"></button>
+            <%= notice %>
+          </p>
+        <% end %>
+        <% if alert %>
+          <p class="notification is-danger">
+            <button class="delete"></button>
+            <%= alert %>
+          </p>
+        <% end %>
+      <%= yield %>      
+    </div>
+    <%= render 'layouts/footer' %>
   </body>
+  <script type="text/javascript">
+    document.addEventListener('DOMContentLoaded', () => {
+        (document.querySelectorAll('.notification .delete') || []).forEach(($delete) => {
+        $notification = $delete.parentNode;
+        $delete.addEventListener('click', () => {
+          $notification.parentNode.removeChild($notification);
+        });
+      });
+    });
+  </script>
 </html>

@@ -1,0 +1,113 @@
+$light-gray: #777;
+$gray-medium-light: #eaeaea;
+
+/* sidebar */
+
+section.user_info {
+  margin-top: 20px;
+}
+section {
+  padding: 10px 0;
+  margin-top: 20px;
+  &:first-child {
+    border: 0;
+    padding-top: 0;
+  }
+  span {
+    display: block;
+    margin-bottom: 3px;
+    line-height: 1;
+  }
+  h1 {
+    font-size: 1.4em;
+    text-align: left;
+    letter-spacing: -1px;
+    margin-bottom: 3px;
+    margin-top: 0px;
+  }
+}
+
+
+.gravatar {
+  float: left;
+  margin-right: 10px;
+}
+
+.gravatar_edit {
+  margin-top: 15px;
+}
+
+.stats {
+  overflow: auto;
+  margin-top: 0;
+  padding: 0;
+  a {
+    float: left;
+    padding: 0 10px;
+    border-left: 1px solid lightgray;
+    color: gray;
+    &:first-child {
+      padding-left: 0;
+      border: 0;
+    }
+    &:hover {
+      text-decoration: none;
+      color: blue;
+    }
+  }
+  strong {
+    display: block;
+  }
+}
+
+.user_avatars {
+  overflow: auto;
+  margin-top: 10px;
+  .gravatar {
+    margin: 1px 1px;
+  }
+  a {
+    padding: 0;
+  }
+}
+
+.users.follow {
+  padding: 0;
+}
+
+/* Users index */
+
+.users {
+  list-style: none;
+  margin: 0;
+  li {
+    overflow: auto;
+    padding: 10px 0;
+    border-bottom: 1px solid lightgray;
+  }
+}
+
+/* footer */
+
+footer {
+  margin-top: 45px;
+  padding-top: 5px;
+  border-top: 1px solid $gray-medium-light;
+  color: $light-gray;
+  text-align: center;
+  font-size: 24px;
+  a {
+    color: blue;
+    &:hover {
+      color: darkgray;
+    }
+  }
+  ul {
+    float: right;
+    list-style: none;
+    li {
+      float: left;
+      margin-left: 15px;
+    }
+  }
+}

@@ -1,0 +1,9 @@
+<% @user ||= current_user %>
+<div class="stats">
+  <a>
+    <strong id="following" class="stat">
+      <%= @user.friends.count %>
+    </strong>
+    <%= (@user.friends.count) == 1 ? 'Friend' : 'Friends'%>
+  </a>
+</div>

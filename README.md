@@ -1,17 +1,41 @@
-# README
+# Microverse Project Title - Final Project [Collaborative Project]
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+Ruby on Rails
 
-Things you may want to cover:
+### Introduction.
+This project requests you to build a Facebook-like social network application.
 
-* Ruby version
+Full task description: https://www.theodinproject.com/courses/ruby-on-rails/lessons/final-project
 
-* System dependencies
+### Live Demo
 
-* Configuration
+[Live Demo Link](https://societalbook.herokuapp.com)
 
-* Database creation
+### Microverse Adjustments
+
+* Skip points 16 about setting up a mailer - you will be able to do it if you complete extra task in next steps (which is optional).
+
+* According to requirements first you should: “Think through the data architecture required to make this work. There are a lot of models and a lot of associations, so take the time to plan out your approach.” Keep that in your mind.
+
+### Project Setup
+
+Head on over to our [Github WiKi](https://github.com/geraldgsh/societalbook/wiki)
+
+### Project specific
+
+###  Ruby version
+
+rbenv 2.6.5
+
+###  System dependencies
+
+Rails 6.0.2.1
+
+Yarn 1.19.1
+
+Ubuntu 18.04 & below
+
+###  Database creation
 
 * Database initialization
 
@@ -22,3 +46,46 @@ Things you may want to cover:
 * Deployment instructions
 
 * ...
+
+### Original Project Source
+
+https://www.theodinproject.com/courses/ruby-on-rails/lessons/final-project
+
+### Github Repo
+
+https://github.com/geraldgsh/societalbook
+
+## Authors
+
+👤 **Author1**
+
+- Github: [@geraldgsh](https://github.com/geraldgsh)
+- Twitter: [@geraldgsh](https://twitter.com/geraldgsh)
+- Linkedin: [geraldgsh](https://linkedin.com/geraldgsh)
+
+👤 **Author2**
+
+- Github: [@jcromerohdz](https://github.com/jcromerohdz)
+- Twitter: [@jcromerohdz](https://twitter.com/jcromerohdz)
+- Linkedin: [christian-romero](https://www.linkedin.com/in/christian-romero-5bb378ba/)
+
+
+## 🤝 Contributing
+
+Contributions, issues and feature requests are welcome!
+
+Feel free to check the [issues page](https://github.com/geraldgsh/societalbook/issues).
+
+## Show your support
+
+Give a ⭐️ if you like this project!
+
+## Acknowledgments
+
+- Hat tip to anyone whose code was used
+- Inspiration
+- etc
+
+## 📝 License
+
+This project is [MIT](lic.url) licensed.

@@ -1,0 +1,17 @@
+<% @user.friends.each do |friend| %>
+  <li>
+    <%= gravatar_for friend, size: 50 %>
+    <%= friend.name %>
+  </li>
+<% end %>
+
+<% 
+=begin %>
+<% if @pal_items.any? %>
+  <ol>
+    <%= render @pal_items %>
+  </ol>
+
+<% end %>
+<% 
+=end %>

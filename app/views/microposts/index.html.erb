@@ -1,0 +1,19 @@
+<div class="hero">
+  <div class="hero-body">
+    <div class="container">
+      <% if signed_in? %>
+        <div class="columns">
+          <div class="column is-one-third">
+            <section class="micropost_form">
+              <%= render "form" %>
+            </section>
+          </div>
+          <div class="column is-two-third">
+            <h3>Micropost Feed</h3>
+            <%= render "feed" %>
+          </div>
+        </div>
+      <%end%>
+    </div>
+  </div>
+</div>
