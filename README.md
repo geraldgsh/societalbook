@@ -2272,6 +2272,209 @@ class Friendship < ApplicationRecord
 .
 ```
 
+# Milestone #6: Friendship Version 2
+
+In this milestone onmiauth is require to log in with a real Facebook account, so
+in this section we will explain the steps are needed to accomplish this requirement.
+
+# 1. The fist step is to add the omniauth-facebook gem, this gem only handle user authentication (login/logout) using an existing Facebook account and this can be done by adding this to your Gemfile and then run bundle install as shown below:
+
+```ruby
+#societalbook/Gemfile
+.
+.
+.
+gem 'omniauth-facebook', '~> 5.0'
+```
+```sh
+$ bundel install
+``
+# 2. Ones the gem is added to our Gemfile, we need to do some configuration in order to make it work,
+for doing the setup we assuming that a rails app is created and the devise gem are properly configured.
+
+# 2.1 In order for this setup work a Facebook app is needed and this can be done by going to the
+https://developers.facebook.com/ then when you are there you need to go through the process of creating an Facebook app, you can go to this reference https://www.youtube.com/watch?v=W-ZLby2hcaE
+
+# 2.2 Now we need to create a migration for the changing our database this can be done by generate a migration via rails as shown below then a migration is needed. Something to consider if you have in your schema the name field just remove it from the migration.
+```sh
+$ rails g migration AddOmniauthToUsers provider:string uid:string name:string image:text
+$ rails db:migrate
+```
+
+# 2.3 We need to add some code to the devise.rb initializer located in config/initializers folder. At bottom of the devise.rb file add the code that is shown bellow, this code is the setup of the Facebook app you already created and the callback URL that is need when users login with their respective accounts.
+
+```sh
+config/initializers/
+├── application_controller_renderer.rb
+├── assets.rb
+├── backtrace_silencers.rb
+├── cloudinary.rb
+├── content_security_policy.rb
+├── cookies_serializer.rb
+├── devise.rb
+├── filter_parameter_logging.rb
+├── inflections.rb
+├── mime_types.rb
+├── pagy.rb
+└── wrap_parameters.rb
+
+```
+```ruby
+Devise.setup do |config|
+.
+.
+.
+# Facebook credentials
+  config.omniauth :facebook, 'FB_ID', 'FB_SECRET', callback_url: "https://societalbook.herokuapp.com/auth/facebook/callback"
+end
+```
+
+# 2.4 Now we need to update the User model of the application, this file is located in app/models/user.rb, in this file we need to update the devise part of the code and add a new custom methods as shown below, the purpose of the methods are grab the provider in this case Facebook and also get basic information from it and also to start the session of the user if there is one.
+
+```sh
+app/models/
+├── application_record.rb
+├── comment.rb
+├── concerns
+├── friendship.rb
+├── like.rb
+├── micropost.rb
+└── user.rb
+```
+```ruby
+class User < ApplicationRecord
+  .
+  .
+  .
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :validatable,
+         :omniauthable, :omniauth_providers => [:facebook]
+  .
+  .
+  .
+  def self.new_with_session(params, session)
+    super.tap do |user|
+      data = session['devise.facebook_data'] && session['devise.facebook_data']['extra']['raw_info']
+      if data
+        user.email = data['email'] if user.email.blank?
+      end
+    end
+  end
+
+  def self.from_omniauth(auth)
+    where(provider: auth.provider, uid: auth.uid).first_or_create do |user|
+      user.email = auth.info.email
+      user.provider = auth.provider
+      user.password = Devise.friendly_token[0, 20]
+      user.name = auth.info.name # assuming the user model has a name
+      user.image = auth.info.image # assuming the user model has an image
+    end
+  end
+
+end
+
+```
+
+# 2.5 Adding the login facebook link to the view app, in this particular case the login view is located at app/views/devise/new.html.erb, assuming you setup this before you will have the line of code at the bottom of the file that looks as shown below. So in shared/links you need to modify _links.html.erb file in order to grab the style we want to apply more specific <%= link_to "Sign in with ....%>  as shown below.
+
+```sh
+app/views/devise/sessions/
+└── new.html.erb
+
+```
+```erb
+<%= render "devise/shared/links" %>
+```
+
+```sh
+app/views/devise/shared/
+├── _error_messages.html.erb
+└── _links.html.erb
+```
+
+```erb
+<%- if devise_mapping.omniauthable? %>
+  <%- resource_class.omniauth_providers.each do |provider| %>
+    <%= link_to "Sign in with #{OmniAuth::Utils.camelize(provider)}", omniauth_authorize_path(resource_name, provider), class: "button is-info" %><br />
+  <% end %>
+```
+
+# 2.6 Now we need to update our routes for the app take the actions for login with Facebook accounts, for this step go to routes file and add the code that is shown below.
+
+```sh
+config
+└── routes.rb
+```
+```ruby
+Rails.application.routes.draw do
+  .
+  .
+  .
+  get '/users/auth/facebook/callback', to: redirect('/auth/facebook/callback')
+  devise_for :users, controllers: { registrations: 'users/registrations', :omniauth_callbacks => 'users/omniauth_callbacks' }, path: '', path_names: { sign_in: 'login', sign_out: 'logout'}
+  .
+  .
+  .
+end
+```
+# 2.7 After we add the routes we need to create file with the name omniauth_callbacks_controller.rb inside users controllers folder as shown below , this is needed for creating the  actions of callbacks this can be seen below.
+```sh
+app/controllers/users
+├── confirmations_controller.rb
+├── omniauth_callbacks_controller.rb
+├── passwords_controller.rb
+├── registrations_controller.rb
+├── sessions_controller.rb
+└── unlocks_controller.rb
+```
+```ruby
+class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
+  # You should configure your model like this:
+  # devise :omniauthable, omniauth_providers: [:twitter]
+
+  # You should also create an action method in this controller like this:
+  # def twitter
+  # end
+
+  # More info at:
+  # https://github.com/plataformatec/devise#omniauth
+
+  # GET|POST /resource/auth/twitter
+  # def passthru
+  #   super
+  # end
+
+  # GET|POST /users/auth/twitter/callback
+  # def failure
+  #   super
+  # end
+
+  # protected
+
+  # The path used when OmniAuth fails
+  # def after_omniauth_failure_path_for(scope)
+  #   super(scope)
+  # end
+
+  def facebook
+    @user = User.from_omniauth(request.env['omniauth.auth'])
+    if @user.persisted?
+      sign_in_and_redirect @user, :event => :authentication
+      set_flash_message(:notice, :success, :kind => 'Facebook') if is_navigational_format?
+    else
+      session['devise.facebook_data'] = request.env['omniauth.auth']
+      redirect_to new_user_registration_url
+    end
+  end
+
+  def failure
+    redirect_to root_path
+  end
+end
+```
+
+#2.8 Final step test, in order to test this you need to deploy to Heroku or something like it because in our experience the authentication with Facebook will not work on localhost:3000. Ones you deploy you will be able to log in with Facebook accounts, another note is that in your Facebook dashboard you need to enable live option status this if you want another people to login.
+
 ### Source
 
 https://www.theodinproject.com/courses/ruby-on-rails/lessons/final-project
