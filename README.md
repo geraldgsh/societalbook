@@ -2288,7 +2288,8 @@ gem 'omniauth-facebook', '~> 5.0'
 ```
 ```sh
 $ bundel install
-``
+```
+
 2. Ones the gem is added to our Gemfile, we need to do some configuration in order to make it work,
 for doing the setup we assuming that a rails app is created and the devise gem are properly configured.
 
@@ -2296,6 +2297,7 @@ for doing the setup we assuming that a rails app is created and the devise gem a
 https://developers.facebook.com/ then when you are there you need to go through the process of creating an Facebook app, you can go to this reference https://www.youtube.com/watch?v=W-ZLby2hcaE
 
 2.2 Now we need to create a migration for the changing our database this can be done by generate a migration via rails as shown below then a migration is needed. Something to consider if you have in your schema the name field just remove it from the migration.
+
 ```sh
 $ rails g migration AddOmniauthToUsers provider:string uid:string name:string image:text
 $ rails db:migrate
