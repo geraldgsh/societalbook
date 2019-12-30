@@ -47,7 +47,7 @@ Ubuntu 18.04 & below
 
 * ...
 
-### Source
+### Original Project Source
 
 https://www.theodinproject.com/courses/ruby-on-rails/lessons/final-project
 
@@ -59,23 +59,22 @@ https://github.com/geraldgsh/societalbook
 
 👤 **Author1**
 
-- Github: [@githubhandle](https://github.com/geraldgsh)
-- Twitter: [@twitterhandle](https://twitter.com/geraldgsh)
-- Linkedin: [linkedin](https://linkedin.com/geraldgsh
+- Github: [@geraldgsh](https://github.com/geraldgsh)
+- Twitter: [@geraldgsh](https://twitter.com/geraldgsh)
+- Linkedin: [geraldgsh](https://linkedin.com/geraldgsh)
 
 👤 **Author2**
 
-<<<<<<< HEAD
-- Github: [@githubhandle](https://github.com/jcromerohdz)
-- Twitter: [@twitterhandle](https://twitter.com/jcromerohdz)
-- Linkedin: [linkedin](https://www.linkedin.com/in/christian-romero-5bb378ba/)
+- Github: [@jcromerohdz](https://github.com/jcromerohdz)
+- Twitter: [@jcromerohdz](https://twitter.com/jcromerohdz)
+- Linkedin: [christian-romero](https://www.linkedin.com/in/christian-romero-5bb378ba/)
 
 
 ## 🤝 Contributing
 
 Contributions, issues and feature requests are welcome!
 
-Feel free to check the [issues page](issues/).
+Feel free to check the [issues page](https://github.com/geraldgsh/societalbook/issues).
 
 ## Show your support
 
