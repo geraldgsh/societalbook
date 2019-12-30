@@ -2329,7 +2329,7 @@ Devise.setup do |config|
 end
 ```
 
-# 2.4 Now we need to update the User model of the application, this file is located in app/models/user.rb, in this file we need to update the devise part of the code and add a new custom methods as shown below, the purpose of the methods are grab the provider in this case Facebook and also get basic information from it and also to start the session of the user if there is one.
+2.4 Now we need to update the User model of the application, this file is located in app/models/user.rb, in this file we need to update the devise part of the code and add a new custom methods as shown below, the purpose of the methods are grab the provider in this case Facebook and also get basic information from it and also to start the session of the user if there is one.
 
 ```sh
 app/models/
