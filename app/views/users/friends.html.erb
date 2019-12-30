@@ -15,11 +15,7 @@
         </div>
 
         <div class="contfreshent">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-          Phasellus nec iaculis mauris. <a>@bulmaio</a>.
-          <a href="#">#css</a> <a href="#">#responsive</a>
-          <br>
-          <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
+          Friended <%= current_user.name %> <%= time_ago_in_words(friend.created_at) %> ago 
         </div>
       </div>
       <footer>
@@ -27,7 +23,6 @@
       </footer>
     </div>
     </div>
-    <% end%>    
+    <% end%>
 </div>
 <%= pagy_bulma_nav(@pagy_a).html_safe %>
-
