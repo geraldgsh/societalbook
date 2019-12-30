@@ -3,8 +3,12 @@
 class HomeController < ApplicationController
   before_action :authenticate_user!
 
-  def index
-    @posts = Micropost.all
-    @post = Micropost.new
+  def home
+  end
+
+  def index 
+  end
+
+  def about
   end
 end

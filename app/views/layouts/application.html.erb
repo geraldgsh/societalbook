@@ -13,7 +13,6 @@
 
   <body>
     <div class="container">
-      <%# <%= render 'layouts/nav' %>
       <%= render "partials/nav"%>
         <% if notice %>
           <p class="notification is-success">
@@ -27,8 +26,9 @@
             <%= alert %>
           </p>
         <% end %>
-      <%= yield %>
+      <%= yield %>      
     </div>
+    <%= render 'layouts/footer' %>
   </body>
   <script type="text/javascript">
     document.addEventListener('DOMContentLoaded', () => {

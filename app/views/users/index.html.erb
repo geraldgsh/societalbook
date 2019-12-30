@@ -1,8 +1,5 @@
 <div class="columns is-multiline is-mobile">
-  <% @users.each do |user| %>
-  <% if user == current_user %>
-  <% elsif current_user.friend?(user) %>
-  <% else %>
+  <% @nofriends.each do |user| %>
   <div class="row column is-one-third">
     <div class="card has-background-light">
 
@@ -18,11 +15,7 @@
         </div>
 
         <div class="content">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-          Phasellus nec iaculis mauris. <a>@bulmaio</a>.
-          <a href="#">#css</a> <a href="#">#responsive</a>
-          <br>
-          <time datetime="2016-1-1">11:09 PM - 1 Jan 2016</time>
+          Joined Societalbook <%= time_ago_in_words(user.created_at) %> ago
         </div>
       </div>
       <footer>
@@ -38,5 +31,5 @@
     </div>
     </div>
     <% end %>
-    <% end %>
 </div>
+<%= pagy_bulma_nav(@pagy).html_safe %>

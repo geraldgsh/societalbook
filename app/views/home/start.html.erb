@@ -1,9 +1,34 @@
-<section class="hero is-dark">
-  <div class="hero-body">
+<section>
+  <div>
     <div class="container">
-      <h1 class="title">
-        Welcome to Societalbook! <%=current_user.email%>
-      </h1>
+      <div class="columns">
+        <div class="column is-one-third">
+          <section class="user_info">
+            <%= gravatar_for current_user %>
+            <h1><%= current_user.name %></h1>
+            <span><%= link_to "view my profile", root_url %></span>
+            <span><b>Microposts:</b> <%= current_user.microposts.count %></span>
+          </section>
+          <section class="stats">
+            <%= render 'partials/stats' %>
+            <% if @user.friends.any? %>
+              <div class="user_avatars">
+                <% @user.friends.each do |friend| %>
+                  <%= gravatar_for friend, :size => 30 %>
+                <% end %>
+              </div>
+            <% end %>
+          </section>
+        </div>
+        <div class="column is-two-third">
+          <h3><%= @title %></h3>
+          <h2>Friend List<h3>
+          <% if @user.friends.any? %>
+            <ul class="users follow">
+              <%= render 'partials/buddies' %>
+            </ul>
+          <% end %>
+        </div>
     </div>
   </div>
 </section>

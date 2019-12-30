@@ -15,15 +15,12 @@
         <br>
         <%= image_tag p.picture.url if p.picture? %>
       </p>
+      <span class="timestamp">
+          Posted <%= time_ago_in_words(p.created_at) %> ago.
+      </span>
     </div>
     <nav class="level is-mobile">
       <div class="level-left">
-        <a class="level-item">
-          <span class="icon is-small"><%=fa_icon "reply-all"%></span>
-        </a>
-        <a class="level-item">
-          <span class="icon is-small"><%=fa_icon "retweet"%></span>
-        </a>
         <a class="level-item">
           <span class="icon is-small">
           <% pre_like = p.likes.find { |like| like.user_id == current_user.id} %>
@@ -35,6 +32,7 @@
           </span>
           <p><%= p.likes.count %> <%= (p.likes.count) == 1 ? 'Like' : 'Likes'%></p>
         </a>
+        
       </div>
       <div class="media-right">
       <% if p.user.id == current_user.id %>
@@ -97,8 +95,8 @@
       </div>
     <% end %>
   </div>
-</article>
+</article><br>
 <%end%>
 <% else %>
-
 <% end %>
+<%= pagy_bulma_nav(@pagy).html_safe %>
