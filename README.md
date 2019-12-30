@@ -2272,12 +2272,12 @@ class Friendship < ApplicationRecord
 .
 ```
 
-# Milestone #6: Friendship Version 2
+# Omniauth implementation
 
 In this milestone onmiauth is require to log in with a real Facebook account, so
 in this section we will explain the steps are needed to accomplish this requirement.
 
-# 1. The fist step is to add the omniauth-facebook gem, this gem only handle user authentication (login/logout) using an existing Facebook account and this can be done by adding this to your Gemfile and then run bundle install as shown below:
+1. The fist step is to add the omniauth-facebook gem. This gem only handle user authentication (login/logout) using an existing Facebook account and this can be done by adding this to your Gemfile and then run bundle install as shown below:
 
 ```ruby
 #societalbook/Gemfile
@@ -2289,19 +2289,19 @@ gem 'omniauth-facebook', '~> 5.0'
 ```sh
 $ bundel install
 ``
-# 2. Ones the gem is added to our Gemfile, we need to do some configuration in order to make it work,
+2. Ones the gem is added to our Gemfile, we need to do some configuration in order to make it work,
 for doing the setup we assuming that a rails app is created and the devise gem are properly configured.
 
-# 2.1 In order for this setup work a Facebook app is needed and this can be done by going to the
+2.1 In order for this setup work a Facebook app is needed and this can be done by going to the
 https://developers.facebook.com/ then when you are there you need to go through the process of creating an Facebook app, you can go to this reference https://www.youtube.com/watch?v=W-ZLby2hcaE
 
-# 2.2 Now we need to create a migration for the changing our database this can be done by generate a migration via rails as shown below then a migration is needed. Something to consider if you have in your schema the name field just remove it from the migration.
+2.2 Now we need to create a migration for the changing our database this can be done by generate a migration via rails as shown below then a migration is needed. Something to consider if you have in your schema the name field just remove it from the migration.
 ```sh
 $ rails g migration AddOmniauthToUsers provider:string uid:string name:string image:text
 $ rails db:migrate
 ```
 
-# 2.3 We need to add some code to the devise.rb initializer located in config/initializers folder. At bottom of the devise.rb file add the code that is shown bellow, this code is the setup of the Facebook app you already created and the callback URL that is need when users login with their respective accounts.
+2.3 We need to add some code to the devise.rb initializer located in config/initializers folder. At bottom of the devise.rb file add the code that is shown bellow, this code is the setup of the Facebook app you already created and the callback URL that is need when users login with their respective accounts.
 
 ```sh
 config/initializers/
@@ -2375,7 +2375,7 @@ end
 
 ```
 
-# 2.5 Adding the login facebook link to the view app, in this particular case the login view is located at app/views/devise/new.html.erb, assuming you setup this before you will have the line of code at the bottom of the file that looks as shown below. So in shared/links you need to modify _links.html.erb file in order to grab the style we want to apply more specific <%= link_to "Sign in with ....%>  as shown below.
+2.5 Adding the login facebook link to the view app, in this particular case the login view is located at app/views/devise/new.html.erb, assuming you setup this before you will have the line of code at the bottom of the file that looks as shown below. So in shared/links you need to modify _links.html.erb file in order to grab the style we want to apply more specific <%= link_to "Sign in with ....%>  as shown below.
 
 ```sh
 app/views/devise/sessions/
@@ -2399,7 +2399,7 @@ app/views/devise/shared/
   <% end %>
 ```
 
-# 2.6 Now we need to update our routes for the app take the actions for login with Facebook accounts, for this step go to routes file and add the code that is shown below.
+2.6 Now we need to update our routes for the app take the actions for login with Facebook accounts, for this step go to routes file and add the code that is shown below.
 
 ```sh
 config
@@ -2417,7 +2417,7 @@ Rails.application.routes.draw do
   .
 end
 ```
-# 2.7 After we add the routes we need to create file with the name omniauth_callbacks_controller.rb inside users controllers folder as shown below , this is needed for creating the  actions of callbacks this can be seen below.
+2.7 After we add the routes we need to create file with the name omniauth_callbacks_controller.rb inside users controllers folder as shown below , this is needed for creating the  actions of callbacks this can be seen below.
 ```sh
 app/controllers/users
 ├── confirmations_controller.rb
@@ -2473,7 +2473,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
 end
 ```
 
-#2.8 Final step test, in order to test this you need to deploy to Heroku or something like it because in our experience the authentication with Facebook will not work on localhost:3000. Ones you deploy you will be able to log in with Facebook accounts, another note is that in your Facebook dashboard you need to enable live option status this if you want another people to login.
+2.8 Final step test, in order to test this you need to deploy to Heroku or something like it because in our experience the authentication with Facebook will not work on localhost:3000. Ones you deploy you will be able to log in with Facebook accounts, another note is that in your Facebook dashboard you need to enable live option status this if you want another people to login.
 
 ### Source
 
