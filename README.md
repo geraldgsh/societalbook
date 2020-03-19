@@ -1,6 +1,11 @@
 # Microverse Project Title - Final Project [Collaborative Project]
-
 Ruby on Rails
+
+## Screenshot
+
+![](https://github.com/geraldgsh/societalbook/blob/master/doc/screenshot-1.JPG)<br>
+
+![](https://github.com/geraldgsh/societalbook/blob/master/doc/screenshot-2.JPG)
 
 ### Introduction.
 This project requests you to build a Facebook-like social network application.
