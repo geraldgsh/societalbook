@@ -60,6 +60,12 @@ https://www.theodinproject.com/courses/ruby-on-rails/lessons/final-project
 
 https://github.com/geraldgsh/societalbook
 
+### Future Features
+
+Add more OAuth for;
+1. Google
+2. Github
+
 ## Authors
 
 👤 **Author1**
