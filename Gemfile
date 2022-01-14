@@ -40,7 +40,7 @@ gem 'font-awesome-rails', '~> 4.7', '>= 4.7.0.2'
 gem 'pagy'
 
 # Image handling
-gem 'carrierwave', '~> 2.0', '>= 2.0.2'
+gem 'carrierwave', '~> 2.1'
 gem 'mini_magick', '~> 4.9', '>= 4.9.5'
 gem 'cloudinary'
 
